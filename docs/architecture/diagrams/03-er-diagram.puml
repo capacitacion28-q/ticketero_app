@@ -1,0 +1,83 @@
+@startuml 03-er-diagram
+!theme plain
+
+title Modelo de Datos ER - Sistema Ticketero Digital
+
+entity "ticket" as ticket {
+  * codigo_referencia : UUID <<PK>>
+  --
+  * numero : VARCHAR(3) <<UQ>>
+  * national_id : VARCHAR(12)
+  * telefono : VARCHAR(15)
+  * branch_office : VARCHAR(50)
+  * queue_type : queue_type_enum
+  * status : ticket_status_enum
+  * position_in_queue : INTEGER
+  * estimated_wait_minutes : INTEGER
+  * created_at : TIMESTAMP WITH TIME ZONE
+  assigned_advisor : VARCHAR(50)
+  assigned_module_number : INTEGER
+  updated_at : TIMESTAMP WITH TIME ZONE
+}
+
+entity "mensaje" as mensaje {
+  * id : BIGSERIAL <<PK>>
+  --
+  * ticket_id : UUID <<FK>>
+  * plantilla : message_template_enum
+  * estado_envio : estado_envio_enum
+  * fecha_programada : TIMESTAMP WITH TIME ZONE
+  fecha_envio : TIMESTAMP WITH TIME ZONE
+  telegram_message_id : VARCHAR(20)
+  * intentos : INTEGER DEFAULT 0
+  created_at : TIMESTAMP WITH TIME ZONE
+}
+
+entity "advisor" as advisor {
+  * id : BIGSERIAL <<PK>>
+  --
+  * nombre : VARCHAR(100)
+  * status : advisor_status_enum
+  * module_number : INTEGER
+  * tickets_atendidos : INTEGER DEFAULT 0
+  * created_at : TIMESTAMP WITH TIME ZONE
+  * updated_at : TIMESTAMP WITH TIME ZONE
+  last_status_change : TIMESTAMP WITH TIME ZONE
+}
+
+entity "audit_event" as audit {
+  * id : BIGSERIAL <<PK>>
+  --
+  * timestamp : TIMESTAMP(3) WITH TIME ZONE
+  * event_type : VARCHAR(50)
+  * actor : VARCHAR(100)
+  * actor_type : actor_type_enum
+  ticket_id : UUID <<FK>>
+  ticket_number : VARCHAR(10)
+  previous_state : VARCHAR(20)
+  new_state : VARCHAR(20)
+  additional_data : JSONB
+  ip_address : VARCHAR(45)
+  * integrity_hash : VARCHAR(64)
+}
+
+' Relaciones
+ticket ||--o{ mensaje : "1:N - Un ticket tiene múltiples mensajes"
+ticket ||--o{ audit : "1:N - Un ticket genera múltiples eventos"
+advisor ||--o{ ticket : "1:N - Un asesor atiende múltiples tickets"
+
+' Enumeraciones
+note top of ticket : **Enumeraciones del Sistema**\n\n**queue_type_enum:**\n- CAJA (prefijo C, prioridad 1)\n- PERSONAL_BANKER (prefijo P, prioridad 2)\n- EMPRESAS (prefijo E, prioridad 3)\n- GERENCIA (prefijo G, prioridad 4)\n\n**ticket_status_enum:**\n- WAITING, NOTIFIED, CALLED\n- IN_SERVICE, COMPLETED\n- CANCELLED, NO_SHOW
+
+note bottom of mensaje : **message_template_enum:**\n- totem_ticket_creado\n- totem_proximo_turno\n- totem_es_tu_turno\n\n**estado_envio_enum:**\n- PENDIENTE, ENVIADO, FALLIDO
+
+note bottom of advisor : **advisor_status_enum:**\n- AVAILABLE (recibe asignaciones)\n- BUSY (atendiendo cliente)\n- OFFLINE (no disponible)
+
+note bottom of audit : **actor_type_enum:**\n- SYSTEM, CLIENT\n- ADVISOR, SUPERVISOR\n\n**Campos JSONB additional_data:**\n- advisorId, moduleNumber\n- errorCode, attemptNumber\n- queueType, branchOffice
+
+' Índices importantes
+note right of ticket : **Índices Críticos:**\n\nUNIQUE (national_id) WHERE status IN\n('WAITING', 'NOTIFIED', 'CALLED')\n-- RN-001: Unicidad ticket activo\n\nINDEX (queue_type, created_at)\n-- RN-003: Orden FIFO por cola\n\nINDEX (status, position_in_queue)\n-- RF-004: Asignación automática
+
+note left of mensaje : **Constraints:**\n\nCHECK (intentos >= 0 AND intentos <= 4)\n-- RN-007: Máximo 3 reintentos\n\nCHECK (fecha_envio IS NULL OR \n       fecha_envio >= fecha_programada)\n-- Lógica temporal
+
+@enduml

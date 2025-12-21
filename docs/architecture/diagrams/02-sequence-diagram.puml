@@ -1,0 +1,141 @@
+@startuml 02-sequence-diagram
+!theme plain
+
+title Diagrama de Secuencia End-to-End - Sistema Ticketero Digital
+
+actor Cliente
+participant "Terminal\nAutoservicio" as Terminal
+participant "TicketController" as Controller
+participant "TicketService" as Service
+participant "QueueManagementService" as QueueService
+participant "TelegramService" as Telegram
+participant "Database" as DB
+participant "MessageScheduler\n(cada 60s)" as MsgScheduler
+participant "QueueProcessor\n(cada 5s)" as QueueProcessor
+participant "Telegram API" as TelegramAPI
+actor Ejecutivo
+
+== Fase 1: Creación de Ticket (RF-001) ==
+
+Cliente -> Terminal: Ingresa RUT y selecciona PERSONAL_BANKER
+Terminal -> Controller: POST /api/tickets
+Controller -> Service: crearTicket(request)
+
+note right of Service: RN-001: Validar unicidad\nticket activo por cliente
+Service -> DB: SELECT COUNT(*) WHERE national_id=? AND status IN ('WAITING','NOTIFIED','CALLED')
+DB --> Service: count = 0 (OK)
+
+note right of Service: RN-005, RN-006: Generar número\nformato [P][01-99]
+Service -> DB: SELECT nextval('personal_banker_seq')
+DB --> Service: sequence = 5
+Service -> Service: numero = "P05"
+
+note right of Service: RN-010: Calcular tiempo estimado\nposición × tiempo_promedio
+Service -> QueueService: calcularPosicion(PERSONAL_BANKER)
+QueueService -> DB: SELECT COUNT(*) WHERE queue_type='PERSONAL_BANKER' AND status IN ('WAITING','NOTIFIED')
+DB --> QueueService: count = 4
+QueueService --> Service: posición = 5, tiempo = 75min (5×15)
+
+Service -> DB: INSERT INTO ticket (codigo_referencia, numero, national_id, queue_type, status, position_in_queue, estimated_wait_minutes)
+DB --> Service: ticket creado
+
+note right of Service: RN-011: Auditoría obligatoria
+Service -> DB: INSERT INTO audit_event (event_type='TICKET_CREATED', actor=national_id, ticket_id)
+DB --> Service: evento registrado
+
+Service -> Telegram: programarMensaje(ticket, "totem_ticket_creado")
+Telegram -> DB: INSERT INTO mensaje (ticket_id, plantilla, estado_envio='PENDIENTE', fecha_programada=NOW())
+DB --> Telegram: mensaje programado
+
+Service --> Controller: TicketResponse
+Controller --> Terminal: HTTP 201 Created
+Terminal --> Cliente: Ticket P05 creado\nPosición: 5, Tiempo: 75min
+
+== Fase 2: Mensaje 1 - Confirmación (RF-002) ==
+
+MsgScheduler -> MsgScheduler: Ejecuta cada 60 segundos
+MsgScheduler -> DB: SELECT * FROM mensaje WHERE estado_envio='PENDIENTE' AND fecha_programada <= NOW()
+DB --> MsgScheduler: mensaje confirmación P05
+
+note right of MsgScheduler: RN-007, RN-008: Reintentos con\nbackoff exponencial 30s, 60s, 120s
+MsgScheduler -> Telegram: enviarMensaje(telefono, plantilla)
+Telegram -> TelegramAPI: POST /sendMessage
+TelegramAPI --> Telegram: telegram_message_id="123456"
+Telegram -> DB: UPDATE mensaje SET estado_envio='ENVIADO', fecha_envio=NOW(), telegram_message_id='123456'
+DB --> Telegram: actualizado
+
+TelegramAPI --> Cliente: 🎫 Ticket P05 creado\nPosición: 5, Tiempo: 75min
+
+== Fase 3: Progreso de Cola (RF-003) ==
+
+QueueProcessor -> QueueProcessor: Ejecuta cada 5 segundos
+note right of QueueProcessor: Simular que ticket P01 se completa
+QueueProcessor -> DB: UPDATE ticket SET status='COMPLETED' WHERE numero='P01'
+DB --> QueueProcessor: ticket P01 completado
+
+note right of QueueProcessor: RN-003: Recalcular posiciones FIFO\npor createdAt ascendente
+QueueProcessor -> QueueService: recalcularPosiciones(PERSONAL_BANKER)
+QueueService -> DB: SELECT * FROM ticket WHERE queue_type='PERSONAL_BANKER' AND status IN ('WAITING','NOTIFIED') ORDER BY created_at
+DB --> QueueService: tickets P02, P03, P04, P05
+
+QueueService -> DB: UPDATE ticket SET position_in_queue=1, estimated_wait_minutes=15 WHERE numero='P02'
+QueueService -> DB: UPDATE ticket SET position_in_queue=2, estimated_wait_minutes=30 WHERE numero='P03'
+QueueService -> DB: UPDATE ticket SET position_in_queue=3, estimated_wait_minutes=45 WHERE numero='P04'
+QueueService -> DB: UPDATE ticket SET position_in_queue=4, estimated_wait_minutes=60 WHERE numero='P05'
+DB --> QueueService: posiciones actualizadas
+
+note right of QueueService: RN-012: Pre-aviso cuando posición ≤ 3
+QueueService -> QueueService: Detecta P04 ahora en posición 3
+QueueService -> Telegram: programarMensaje(P04, "totem_proximo_turno")
+Telegram -> DB: INSERT INTO mensaje (ticket_id, plantilla='totem_proximo_turno')
+DB --> Telegram: mensaje 2 programado
+
+QueueService -> DB: UPDATE ticket SET status='NOTIFIED' WHERE numero='P04'
+DB --> QueueService: P04 marcado como NOTIFIED
+
+== Fase 4: Asignación Automática (RF-004) ==
+
+note right of QueueProcessor: Ejecutivo "María González" se libera
+QueueProcessor -> DB: UPDATE advisor SET status='AVAILABLE' WHERE nombre='María González'
+DB --> QueueProcessor: ejecutivo disponible
+
+note right of QueueProcessor: RN-002: Prioridad colas\nGERENCIA=4, EMPRESAS=3, PERSONAL_BANKER=2, CAJA=1
+QueueProcessor -> QueueService: asignarSiguienteTicket()
+QueueService -> DB: SELECT * FROM ticket WHERE status IN ('WAITING','NOTIFIED') ORDER BY queue_priority DESC, created_at ASC LIMIT 1
+DB --> QueueService: ticket P02 (más antiguo en PERSONAL_BANKER)
+
+note right of QueueService: RN-004: Balanceo de carga\nejecutivo con menos tickets atendidos
+QueueService -> DB: SELECT * FROM advisor WHERE status='AVAILABLE' ORDER BY tickets_atendidos ASC, last_status_change ASC LIMIT 1
+DB --> QueueService: María González (7 tickets atendidos)
+
+QueueService -> DB: BEGIN TRANSACTION
+QueueService -> DB: UPDATE ticket SET status='CALLED', assigned_advisor='María González', assigned_module_number=3 WHERE numero='P02'
+QueueService -> DB: UPDATE advisor SET status='BUSY', tickets_atendidos=8 WHERE nombre='María González'
+QueueService -> DB: INSERT INTO audit_event (event_type='TICKET_ASSIGNED', ticket_id, additional_data)
+QueueService -> DB: COMMIT TRANSACTION
+DB --> QueueService: asignación completada
+
+QueueService -> Telegram: programarMensaje(P02, "totem_es_tu_turno")
+Telegram -> DB: INSERT INTO mensaje (ticket_id, plantilla='totem_es_tu_turno')
+DB --> Telegram: mensaje 3 programado
+
+== Fase 5: Completar Atención ==
+
+MsgScheduler -> Telegram: enviarMensaje(P02, "totem_es_tu_turno")
+Telegram -> TelegramAPI: POST /sendMessage
+TelegramAPI --> Cliente: ✅ ¡Es tu turno!\nMódulo: 3, Te atiende: María González
+
+Cliente -> Ejecutivo: Se presenta en módulo 3
+Ejecutivo -> Controller: PUT /api/tickets/P02/complete
+Controller -> Service: completarAtencion(P02)
+Service -> DB: UPDATE ticket SET status='COMPLETED' WHERE numero='P02'
+Service -> DB: UPDATE advisor SET status='AVAILABLE' WHERE nombre='María González'
+Service -> DB: INSERT INTO audit_event (event_type='TICKET_COMPLETED')
+DB --> Service: atención completada
+
+Service --> Controller: HTTP 200 OK
+Controller --> Ejecutivo: Atención registrada
+
+note over QueueProcessor: Ciclo continúa con siguiente\nticket en cola (P03)
+
+@enduml
