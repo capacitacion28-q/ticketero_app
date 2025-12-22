@@ -35,6 +35,9 @@ Refinar prompts mediante análisis iterativo sección por sección para:
 - Guardar prompts refinados en `/docs/prompts/[fase-desarrollo]/`
 - Consultar ubicación si hay dudas sobre la fase actual
 
+**Principio metodológico fundamental**:
+- Cada prompt refinado debe detallar la metodología que debe seguir el agente con base en este documento: docs\prompts\prompt-methodology-master.md
+
 ---
 
 ## CONTEXTO
