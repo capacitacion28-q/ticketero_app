@@ -1,7 +1,7 @@
 # Prompt de Verificación: Cumplimiento de Especificaciones Técnicas
 
 **Versión:** 1.0  
-**Fecha:** Diciembre 2024  
+**Fecha:** Diciembre 2025  
 **Tipo:** Prompt de Auditoría y Verificación  
 **Basado en:** Metodología Universal de Auditoría de Documentos Técnicos
 
@@ -130,9 +130,9 @@ Proceso sistemático de auditoría de cumplimiento:
 - **Porcentaje de Cumplimiento:** [X]%
 
 ## 2. MATRIZ DE CUMPLIMIENTO
-| Elemento Obligatorio | Especificado en Prompt | Presente en Documento | Estado | Observaciones |
-|---------------------|------------------------|----------------------|--------|---------------|
-| [elemento 1] | [sí/no] | [sí/no/parcial] | [✅/⚠️/❌] | [detalles] |
+| Elemento Obligatorio | Especificado en Prompt | Presente en Documento | Estado  | Observaciones |
+| -------------------- | ---------------------- | --------------------- | ------- | ------------- |
+| [elemento 1]         | [sí/no]                | [sí/no/parcial]       | [✅/⚠️/❌] | [detalles]    |
 
 ## 3. HALLAZGOS DETALLADOS
 ### 3.1 Críticos

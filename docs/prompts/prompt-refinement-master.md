@@ -1,7 +1,7 @@
 # Prompt Master: Refinamiento de Prompts para Sistema Ticketero
 
 **Versión:** 1.0  
-**Fecha:** Diciembre 2024  
+**Fecha:** Diciembre 2025  
 **Tipo:** Prompt de Refinamiento
 
 ---
