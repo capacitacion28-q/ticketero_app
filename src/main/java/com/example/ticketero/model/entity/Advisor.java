@@ -61,7 +61,7 @@ public class Advisor {
      * @return true si puede recibir tickets
      */
     public boolean canReceiveTickets() {
-        return status.canReceiveTickets() && currentTickets < maxConcurrentTickets;
+        return this.status != AdvisorStatus.OFFLINE;
     }
     
     /**

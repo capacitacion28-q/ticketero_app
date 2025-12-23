@@ -1,14 +1,9 @@
--- V5: Insertar datos iniciales
--- Referencia: Plan Detallado Sección 8.1.1 - FASE 1
--- Datos iniciales: 5 asesores para testing
+-- V5__insert_initial_data.sql
+-- Datos iniciales: 5 asesores según documento
 
-INSERT INTO advisor (name, status, current_tickets, max_concurrent_tickets) VALUES
-('Ana García', 'AVAILABLE', 0, 3),
-('Carlos Rodríguez', 'AVAILABLE', 0, 3),
-('María López', 'AVAILABLE', 0, 3),
-('Juan Martínez', 'AVAILABLE', 0, 3),
-('Laura Fernández', 'AVAILABLE', 0, 3);
-
--- Comentario para documentación
--- Datos iniciales para testing del sistema de colas
--- Todos los asesores inician disponibles con capacidad para 3 tickets concurrentes
+INSERT INTO advisor (name, email, status, module_number) VALUES
+    ('María González', 'maria.gonzalez@institucion.cl', 'AVAILABLE', 1),
+    ('Juan Pérez', 'juan.perez@institucion.cl', 'AVAILABLE', 2),
+    ('Ana Silva', 'ana.silva@institucion.cl', 'AVAILABLE', 3),
+    ('Carlos Rojas', 'carlos.rojas@institucion.cl', 'AVAILABLE', 4),
+    ('Patricia Díaz', 'patricia.diaz@institucion.cl', 'AVAILABLE', 5);

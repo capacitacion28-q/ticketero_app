@@ -1,6 +1,6 @@
 package com.example.ticketero.model.entity;
 
-import com.example.ticketero.model.enums.DeliveryStatus;
+import com.example.ticketero.model.enums.EstadoEnvio;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -48,7 +48,7 @@ public class Mensaje {
     @Enumerated(EnumType.STRING)
     @Column(name = "delivery_status", nullable = false, length = 20)
     @Builder.Default
-    private DeliveryStatus deliveryStatus = DeliveryStatus.PENDING;
+    private EstadoEnvio deliveryStatus = EstadoEnvio.PENDIENTE;
     
     @Column(name = "retry_count", nullable = false)
     @Builder.Default
@@ -70,7 +70,7 @@ public class Mensaje {
      * @return true si puede reintentarse
      */
     public boolean canRetry() {
-        return deliveryStatus.canRetry() && retryCount < 3;
+        return deliveryStatus.getDescription().contains("pendiente") && retryCount < 3;
     }
     
     /**
@@ -91,8 +91,7 @@ public class Mensaje {
             
             this.nextRetryAt = LocalDateTime.now().plusSeconds(delaySeconds);
         } else {
-            // Máximo de reintentos alcanzado
-            this.deliveryStatus = DeliveryStatus.FAILED;
+            this.deliveryStatus = EstadoEnvio.FALLIDO;
             this.nextRetryAt = null;
         }
     }
@@ -101,7 +100,7 @@ public class Mensaje {
      * Marca el mensaje como enviado exitosamente
      */
     public void markAsSent() {
-        this.deliveryStatus = DeliveryStatus.SENT;
+        this.deliveryStatus = EstadoEnvio.ENVIADO;
         this.sentAt = LocalDateTime.now();
         this.nextRetryAt = null;
     }
@@ -112,7 +111,7 @@ public class Mensaje {
      * @param errorMessage Mensaje de error
      */
     public void markAsFailed(String errorMessage) {
-        this.deliveryStatus = DeliveryStatus.FAILED;
+        this.deliveryStatus = EstadoEnvio.FALLIDO;
         this.errorMessage = errorMessage;
         incrementRetryCount();
     }
@@ -121,7 +120,7 @@ public class Mensaje {
      * Cancela el envío del mensaje
      */
     public void cancel() {
-        this.deliveryStatus = DeliveryStatus.CANCELLED;
+        this.deliveryStatus = EstadoEnvio.FALLIDO;
         this.nextRetryAt = null;
     }
     
@@ -131,7 +130,7 @@ public class Mensaje {
      * @return true si necesita procesamiento
      */
     public boolean needsProcessing() {
-        return deliveryStatus.needsProcessing() || 
+        return deliveryStatus.getDescription().contains("pendiente") || 
                (nextRetryAt != null && nextRetryAt.isBefore(LocalDateTime.now()));
     }
 }

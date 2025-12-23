@@ -1,13 +1,14 @@
 package com.example.ticketero.model.enums;
 
-public enum AdvisorStatus {
-    AVAILABLE("Disponible para atender"),
-    BUSY("Atendiendo cliente"),
-    OFFLINE("No disponible");
+public enum ActorType {
+    SYSTEM("Sistema automático"),
+    CLIENT("Cliente/Usuario"),
+    ADVISOR("Ejecutivo/Asesor"),
+    SUPERVISOR("Supervisor de sucursal");
 
     private final String description;
 
-    AdvisorStatus(String description) {
+    ActorType(String description) {
         this.description = description;
     }
 

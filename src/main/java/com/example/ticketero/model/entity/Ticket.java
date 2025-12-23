@@ -94,7 +94,7 @@ public class Ticket {
      * @return true si está en estado activo
      */
     public boolean isActive() {
-        return status.isActive();
+        return this.status == TicketStatus.WAITING || this.status == TicketStatus.NOTIFIED || this.status == TicketStatus.CALLED;
     }
     
     /**
@@ -103,7 +103,7 @@ public class Ticket {
      * @return true si puede ser asignado
      */
     public boolean canBeAssigned() {
-        return status.canAssignAdvisor();
+        return status == TicketStatus.NOTIFIED;
     }
     
     /**
@@ -113,7 +113,7 @@ public class Ticket {
      */
     public void assignToAdvisor(Advisor advisor) {
         this.advisor = advisor;
-        this.status = TicketStatus.IN_PROGRESS;
+        this.status = TicketStatus.IN_SERVICE;
         this.assignedAt = LocalDateTime.now();
         this.positionInQueue = null; // Ya no está en cola
     }

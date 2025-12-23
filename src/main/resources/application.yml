@@ -7,9 +7,9 @@ spring:
   
   # Configuración PostgreSQL según stack tecnológico
   datasource:
-    url: jdbc:postgresql://localhost:5432/ticketero_db
-    username: ticketero_user
-    password: ticketero_pass
+    url: jdbc:postgresql://${DATABASE_HOST:localhost}:${DATABASE_PORT:5432}/${DATABASE_NAME:ticketero_db}
+    username: ${DATABASE_USER:ticketero_user}
+    password: ${DATABASE_PASSWORD:ticketero_pass}
     driver-class-name: org.postgresql.Driver
   
   # Configuración JPA/Hibernate
@@ -82,5 +82,3 @@ logging:
 # Configuración del servidor
 server:
   port: ${SERVER_PORT:8080}
-  servlet:
-    context-path: /api/v1

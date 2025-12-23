@@ -1,15 +1,11 @@
 package com.example.ticketero.model.entity;
 
-import com.example.ticketero.model.enums.EntityType;
-import com.example.ticketero.model.enums.EventType;
+import com.example.ticketero.model.enums.ActorType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
-import java.util.Map;
 
 /**
  * Entity AuditEvent - Eventos de auditoría del sistema
@@ -35,42 +31,52 @@ public class AuditEvent {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @Enumerated(EnumType.STRING)
-    @Column(name = "event_type", nullable = false, length = 50)
-    private EventType eventType;
-    
-    @Enumerated(EnumType.STRING)
-    @Column(name = "entity_type", nullable = false, length = 50)
-    private EntityType entityType;
-    
-    @Column(name = "entity_id")
-    private Long entityId;
-    
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "old_values", columnDefinition = "jsonb")
-    private Map<String, Object> oldValues;
-    
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "new_values", columnDefinition = "jsonb")
-    private Map<String, Object> newValues;
-    
-    @Column(name = "user_id", length = 100)
-    private String userId;
-    
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime timestamp;
     
-    @Column(columnDefinition = "TEXT")
-    private String details;
+    @Column(name = "event_type", nullable = false, length = 50)
+    private String eventType;
     
-    /**
-     * Verifica si el evento es crítico según RN-011
-     * 
-     * @return true si requiere auditoría obligatoria
-     */
-    public boolean isCritical() {
-        return eventType.isCritical();
+    @Column(name = "actor", nullable = false, length = 100)
+    private String actor;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(name = "actor_type", nullable = false)
+    private ActorType actorType;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ticket_id")
+    @ToString.Exclude
+    private Ticket ticket;
+    
+    @Column(name = "ticket_number", length = 10)
+    private String ticketNumber;
+    
+    @Column(name = "previous_state", length = 20)
+    private String previousState;
+    
+    @Column(name = "new_state", length = 20)
+    private String newState;
+    
+    @Column(name = "additional_data", columnDefinition = "jsonb")
+    private String additionalData;
+    
+    @Column(name = "ip_address", length = 45)
+    private String ipAddress;
+    
+    @Column(name = "integrity_hash", nullable = false, length = 64)
+    private String integrityHash;
+    
+    @PrePersist
+    protected void onCreate() {
+        if (integrityHash == null) {
+            integrityHash = generateIntegrityHash();
+        }
+    }
+    
+    private String generateIntegrityHash() {
+        return String.valueOf((eventType + actor + timestamp.toString()).hashCode());
     }
     
     /**
@@ -81,55 +87,5 @@ public class AuditEvent {
     public boolean shouldBeRetained() {
         LocalDateTime retentionLimit = LocalDateTime.now().minusYears(7);
         return timestamp.isAfter(retentionLimit);
-    }
-    
-    /**
-     * Crea un evento de auditoría para creación de entidad
-     * 
-     * @param entityType Tipo de entidad
-     * @param entityId ID de la entidad
-     * @param newValues Valores nuevos
-     * @param userId Usuario que ejecutó la acción
-     * @return AuditEvent configurado
-     */
-    public static AuditEvent createEvent(EntityType entityType, Long entityId, 
-                                       Map<String, Object> newValues, String userId) {
-        EventType eventType = switch (entityType) {
-            case TICKET -> EventType.TICKET_CREATED;
-            case ADVISOR -> EventType.ADVISOR_STATUS_CHANGED;
-            case MENSAJE -> EventType.MESSAGE_SENT;
-        };
-        
-        return AuditEvent.builder()
-                .eventType(eventType)
-                .entityType(entityType)
-                .entityId(entityId)
-                .newValues(newValues)
-                .userId(userId)
-                .build();
-    }
-    
-    /**
-     * Crea un evento de auditoría para actualización de entidad
-     * 
-     * @param eventType Tipo de evento específico
-     * @param entityType Tipo de entidad
-     * @param entityId ID de la entidad
-     * @param oldValues Valores anteriores
-     * @param newValues Valores nuevos
-     * @param userId Usuario que ejecutó la acción
-     * @return AuditEvent configurado
-     */
-    public static AuditEvent updateEvent(EventType eventType, EntityType entityType, 
-                                       Long entityId, Map<String, Object> oldValues,
-                                       Map<String, Object> newValues, String userId) {
-        return AuditEvent.builder()
-                .eventType(eventType)
-                .entityType(entityType)
-                .entityId(entityId)
-                .oldValues(oldValues)
-                .newValues(newValues)
-                .userId(userId)
-                .build();
     }
 }
