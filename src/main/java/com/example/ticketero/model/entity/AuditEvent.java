@@ -2,26 +2,16 @@ package com.example.ticketero.model.entity;
 
 import com.example.ticketero.model.enums.ActorType;
 import jakarta.persistence.*;
-import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-/**
- * Entity AuditEvent - Eventos de auditoría del sistema
- * 
- * Referencia: Plan Detallado Sección 8.2.1 - FASE 2
- * Diagrama ER: docs/architecture/diagrams/03-er-diagram.puml
- * RN-011: Auditoría obligatoria de eventos críticos
- * RN-013: Retención de auditoría por 7 años
- * 
- * @author Sistema Ticketero
- * @version 1.0
- */
 @Entity
 @Table(name = "audit_event")
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -31,8 +21,7 @@ public class AuditEvent {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @CreationTimestamp
-    @Column(nullable = false, updatable = false)
+    @Column(name = "timestamp", nullable = false)
     private LocalDateTime timestamp;
     
     @Column(name = "event_type", nullable = false, length = 50)
@@ -47,7 +36,6 @@ public class AuditEvent {
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ticket_id")
-    @ToString.Exclude
     private Ticket ticket;
     
     @Column(name = "ticket_number", length = 10)
@@ -70,22 +58,15 @@ public class AuditEvent {
     
     @PrePersist
     protected void onCreate() {
-        if (integrityHash == null) {
-            integrityHash = generateIntegrityHash();
+        if (timestamp == null) {
+            timestamp = LocalDateTime.now();
         }
+        // Generar hash de integridad (simplificado para el ejemplo)
+        integrityHash = generateIntegrityHash();
     }
     
     private String generateIntegrityHash() {
+        // Implementación simplificada - en producción usar SHA-256
         return String.valueOf((eventType + actor + timestamp.toString()).hashCode());
-    }
-    
-    /**
-     * Verifica si el evento debe ser retenido según RN-013
-     * 
-     * @return true si debe mantenerse (menos de 7 años)
-     */
-    public boolean shouldBeRetained() {
-        LocalDateTime retentionLimit = LocalDateTime.now().minusYears(7);
-        return timestamp.isAfter(retentionLimit);
     }
 }
