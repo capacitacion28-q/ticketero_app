@@ -41,6 +41,21 @@ Análisis y especificación de requerimientos del sistema.
 - ⏳ Deploy - Configuración y despliegue
 - ⏳ Document - Documentación final
 
+## 📋 Consideraciones del Proyecto
+
+### Estructura de Packages
+Este proyecto utiliza `com.example.ticketero` como package base por ser un **prototipo de demostración**.
+
+**Para uso productivo:**
+1. Refactorizar packages a `com.{empresa}.ticketero`
+2. Actualizar `groupId` en `pom.xml`
+3. Ajustar imports en todos los archivos Java
+
+### Configuraciones de Desarrollo
+- Base de datos: PostgreSQL local con credenciales de desarrollo
+- Tokens: Variables de entorno para Telegram Bot API
+- Schedulers: Intervalos configurables para testing
+
 ## 📖 Cómo Usar
 
 1. **Revisar requerimientos** → `/docs/requirements/`
