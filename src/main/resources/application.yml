@@ -40,10 +40,9 @@ scheduler:
 
 # Configuración Telegram Bot API según ADR-002
 telegram:
-  bot:
-    token: ${TELEGRAM_BOT_TOKEN:dummy-token-for-dev}
-    api-url: https://api.telegram.org/bot
-    timeout: ${TELEGRAM_TIMEOUT:30000}
+  bot-token: ${TELEGRAM_BOT_TOKEN:dummy-token-for-dev}
+  api-url: https://api.telegram.org/bot
+  timeout: ${TELEGRAM_TIMEOUT:30000}
     
 # Configuración de Reintentos según ADR-001 (RN-007, RN-008)
 retry:
