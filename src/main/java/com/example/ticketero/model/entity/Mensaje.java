@@ -52,11 +52,11 @@ public class Mensaje {
     private Integer intentos = 0;
     
     @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
+    private LocalDateTime fechaCreacion;
     
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now();
+        fechaCreacion = LocalDateTime.now();
         if (fechaProgramada == null) {
             fechaProgramada = LocalDateTime.now();
         }

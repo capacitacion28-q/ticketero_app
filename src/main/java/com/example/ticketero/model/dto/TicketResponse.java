@@ -1,15 +1,15 @@
 package com.example.ticketero.model.dto;
 
 import com.example.ticketero.model.entity.Ticket;
+import com.example.ticketero.model.entity.EstadoTicket;
 import com.example.ticketero.model.enums.QueueType;
-import com.example.ticketero.model.enums.TicketStatus;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
  * DTO de respuesta para tickets - RF-001, RF-002
- * Incluye información completa del ticket y posición en cola
+ * Usa EstadoTicket del package entity según especificaciones
  */
 public record TicketResponse(
     UUID codigoReferencia,
@@ -18,7 +18,7 @@ public record TicketResponse(
     String telefono,
     String branchOffice,
     QueueType queueType,
-    TicketStatus status,
+    EstadoTicket status,
     Integer positionInQueue,
     Integer estimatedWaitMinutes,
     String assignedAdvisor,
@@ -40,8 +40,8 @@ public record TicketResponse(
             ticket.getEstimatedWaitMinutes(),
             ticket.getAssignedAdvisor(),
             ticket.getAssignedModuleNumber(),
-            ticket.getCreatedAt(),
-            ticket.getUpdatedAt(),
+            ticket.getFechaCreacion(),
+            ticket.getFechaActualizacion(),
             ticket.getStatus().getDescription()
         );
     }

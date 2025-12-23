@@ -6,10 +6,10 @@ import java.util.List;
 
 /**
  * DTO para estado de colas - RF-003
- * Información detallada de cada cola con tickets en espera
+ * Nomenclatura unificada en español para Sistema Ticketero
  */
 public record QueueStatusResponse(
-    QueueType queueType,
+    QueueType tipoCola,
     String descripcion,
     int tiempoPromedio,
     int prioridad,
@@ -27,8 +27,8 @@ public record QueueStatusResponse(
     
     public record TicketEnCola(
         String numero,
-        String status,
-        int positionInQueue,
-        int estimatedWaitMinutes
+        String estado,
+        int posicionEnCola,
+        int tiempoEstimadoMinutos
     ) {}
 }

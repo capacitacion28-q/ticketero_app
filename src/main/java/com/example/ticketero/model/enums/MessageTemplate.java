@@ -1,9 +1,9 @@
 package com.example.ticketero.model.enums;
 
 public enum MessageTemplate {
-    totem_ticket_creado("Confirmación de creación"),
-    totem_proximo_turno("Pre-aviso de proximidad"),
-    totem_es_tu_turno("Asignación a ejecutivo");
+    TOTEM_TICKET_CREADO("Confirmación de creación"),
+    TOTEM_PROXIMO_TURNO("Pre-aviso de proximidad"),
+    TOTEM_ES_TU_TURNO("Asignación a ejecutivo");
 
     private final String description;
 

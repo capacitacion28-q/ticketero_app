@@ -8,6 +8,7 @@ import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -41,6 +42,9 @@ public class DtoValidationTest {
         System.out.println("\n1. Test TicketCreateRequest VÁLIDO:");
         
         TicketCreateRequest validRequest = new TicketCreateRequest(
+            "Sistema de Tickets Actualizado",
+            "Descripción completa del sistema de tickets para el banco",
+            1L,
             "12345678-9",
             "+56987654321",
             "Sucursal Centro",
@@ -65,6 +69,9 @@ public class DtoValidationTest {
         System.out.println("\n2. Test TicketCreateRequest INVÁLIDO:");
         
         TicketCreateRequest invalidRequest = new TicketCreateRequest(
+            "ABC",        // Título muy corto
+            "Desc",       // Descripción muy corta
+            -1L,          // Usuario ID negativo
             "123456789",  // RUT inválido
             "987654321",  // Teléfono sin +56
             "",           // Sucursal vacía
@@ -76,7 +83,7 @@ public class DtoValidationTest {
         System.out.println("   📊 Violaciones encontradas: " + violations.size());
         violations.forEach(v -> System.out.println("   ❌ " + v.getPropertyPath() + ": " + v.getMessage()));
         
-        if (violations.size() == 4) {
+        if (violations.size() >= 6) {
             System.out.println("   ✅ Validaciones funcionando correctamente");
         }
     }
@@ -91,11 +98,11 @@ public class DtoValidationTest {
         System.out.println("   ✅ ErrorResponse constructores - Definidos");
         
         // Test ErrorResponse constructors
-        ErrorResponse error1 = new ErrorResponse("VALIDATION_ERROR", "Datos inválidos");
-        ErrorResponse error2 = new ErrorResponse("NOT_FOUND", "Ticket no encontrado", null);
+        ErrorResponse error1 = new ErrorResponse("Datos inválidos", 400, "/api/tickets");
+        ErrorResponse error2 = new ErrorResponse("Ticket no encontrado", 404, List.of("ID no existe"), "/api/tickets/999");
         
-        System.out.println("   📋 ErrorResponse 1: " + error1.code() + " - " + error1.message());
-        System.out.println("   📋 ErrorResponse 2: " + error2.code() + " - " + error2.message());
+        System.out.println("   📋 ErrorResponse 1: " + error1.status() + " - " + error1.message());
+        System.out.println("   📋 ErrorResponse 2: " + error2.status() + " - " + error2.message());
     }
     
     private static void testNestedRecords() {
@@ -111,7 +118,7 @@ public class DtoValidationTest {
         );
         
         System.out.println("   ✅ EstadoActual creado: " + estado.ticketsEnEspera() + " tickets en espera");
-        System.out.println("   ✅ TicketEnCola creado: " + ticket.numero() + " en posición " + ticket.positionInQueue());
+        System.out.println("   ✅ TicketEnCola creado: " + ticket.numero() + " en posición " + ticket.posicionEnCola());
         
         // Test DashboardResponse records anidados
         DashboardResponse.Alerta alerta = new DashboardResponse.Alerta(

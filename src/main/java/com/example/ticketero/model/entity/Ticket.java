@@ -1,7 +1,7 @@
 package com.example.ticketero.model.entity;
 
 import com.example.ticketero.model.enums.QueueType;
-import com.example.ticketero.model.enums.TicketStatus;
+import com.example.ticketero.model.entity.EstadoTicket;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -45,7 +45,7 @@ public class Ticket {
     
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private TicketStatus status;
+    private EstadoTicket status;
     
     @Column(name = "position_in_queue", nullable = false)
     private Integer positionInQueue;
@@ -60,10 +60,10 @@ public class Ticket {
     private Integer assignedModuleNumber;
     
     @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
+    private LocalDateTime fechaCreacion;
     
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    private LocalDateTime fechaActualizacion;
     
     // Relación con mensajes
     @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -78,12 +78,12 @@ public class Ticket {
         if (codigoReferencia == null) {
             codigoReferencia = UUID.randomUUID();
         }
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
+        fechaCreacion = LocalDateTime.now();
+        fechaActualizacion = LocalDateTime.now();
     }
     
     @PreUpdate
     protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
+        fechaActualizacion = LocalDateTime.now();
     }
 }
