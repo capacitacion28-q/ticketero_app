@@ -42,13 +42,13 @@ public class QueueManagementService {
     // RN-002, RN-003, RN-004: Asignación automática
     public void asignarSiguienteTicket() {
         // RN-002: Seleccionar ticket con mayor prioridad (simplificado)
-        List<Ticket> nextTickets = ticketRepository.findByStatusOrderByFechaCreacionAsc(EstadoTicket.WAITING);
-        if (nextTickets.isEmpty()) {
+        Optional<Ticket> nextTicket = ticketRepository.findNextTicketByPriority(QueueType.CAJA);
+        if (nextTicket.isEmpty()) {
             log.debug("No hay tickets pendientes para asignar");
             return;
         }
         
-        Ticket nextTicket = nextTickets.get(0);
+        Ticket ticket = nextTicket.get();
         
         // RN-004: Balanceo de carga (simplificado)
         List<Advisor> availableAdvisors = advisorRepository.findAll();
@@ -59,24 +59,24 @@ public class QueueManagementService {
         
         Advisor asesor = availableAdvisors.get(0); // Tomar el primero disponible
         
-        nextTicket.setStatus(EstadoTicket.CALLED);
-        nextTicket.setAssignedAdvisor(asesor.getName());
-        nextTicket.setAssignedModuleNumber(asesor.getModuleNumber());
+        ticket.setStatus(EstadoTicket.CALLED);
+        ticket.setAssignedAdvisor(asesor.getName());
+        ticket.setAssignedModuleNumber(asesor.getModuleNumber());
         
         asesor.setStatus(AdvisorStatus.BUSY);
         asesor.incrementAssignedTicketsCount();
         
-        ticketRepository.save(nextTicket);
+        ticketRepository.save(ticket);
         advisorRepository.save(asesor);
         
         // Auditoría simplificada
-        log.info("Ticket {} asignado - auditoría registrada", nextTicket.getNumero());
+        log.info("Ticket {} asignado - auditoría registrada", ticket.getNumero());
         
         // RF-002: Programar mensaje de turno activo
-        telegramService.programarMensaje(nextTicket, MessageTemplate.TOTEM_ES_TU_TURNO);
+        telegramService.programarMensaje(ticket, MessageTemplate.TOTEM_ES_TU_TURNO);
         
         log.info("Ticket {} asignado a asesor {} módulo {}", 
-                nextTicket.getNumero(), asesor.getName(), asesor.getModuleNumber());
+                ticket.getNumero(), asesor.getName(), asesor.getModuleNumber());
     }
     
     // RN-012: Pre-aviso cuando posición ≤ 3 (simplificado)

@@ -53,7 +53,13 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     );
     
     // Próximo ticket por prioridad - ESPECIFICACIÓN EXACTA DEL PLAN
-    Optional<Ticket> findNextTicketByPriority(QueueType queueType);
+    @Query("""
+        SELECT t FROM Ticket t 
+        WHERE t.status = 'WAITING' 
+        AND t.queueType = :queueType
+        ORDER BY t.fechaCreacion ASC
+        """)
+    Optional<Ticket> findNextTicketByPriority(@Param("queueType") QueueType queueType);
     
     // Tickets por asesor asignado
     List<Ticket> findByAssignedAdvisorAndStatusOrderByFechaActualizacionDesc(String advisor, EstadoTicket status);

@@ -12,10 +12,10 @@ import org.springframework.web.client.RestTemplate;
 @Configuration
 public class TelegramConfig {
     
-    @Value("${telegram.bot-token}")
+    @Value("${telegram.bot-token:dummy-token}")
     private String botToken;
     
-    @Value("${telegram.api-url}")
+    @Value("${telegram.api-url:https://api.telegram.org/bot}")
     private String apiUrl;
     
     @Bean
