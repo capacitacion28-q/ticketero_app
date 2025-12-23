@@ -3,7 +3,7 @@ package com.example.ticketero.service;
 import com.example.ticketero.model.dto.TicketCreateRequest;
 import com.example.ticketero.model.dto.TicketResponse;
 import com.example.ticketero.model.entity.Ticket;
-import com.example.ticketero.model.entity.EstadoTicket;
+import com.example.ticketero.model.enums.TicketStatus;
 import com.example.ticketero.repository.TicketRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,7 +44,7 @@ public class TicketService {
             .telefono(request.telefono())
             .branchOffice(request.branchOffice())
             .queueType(request.queueType())
-            .status(EstadoTicket.WAITING)
+            .status(TicketStatus.WAITING)
             .fechaCreacion(LocalDateTime.now())
             .build();
         
@@ -75,18 +75,18 @@ public class TicketService {
     }
     
     @Transactional
-    public TicketResponse updateStatus(UUID codigoReferencia, EstadoTicket newStatus) {
+    public TicketResponse updateStatus(UUID codigoReferencia, TicketStatus newStatus) {
         Ticket ticket = ticketRepository.findByCodigoReferencia(codigoReferencia)
             .orElseThrow(() -> new com.example.ticketero.exception.TicketNotFoundException("Ticket not found: " + codigoReferencia));
         
-        EstadoTicket oldStatus = ticket.getStatus();
+        TicketStatus oldStatus = ticket.getStatus();
         ticket.setStatus(newStatus);
         ticket.setFechaActualizacion(LocalDateTime.now());
         
         Ticket updatedTicket = ticketRepository.save(ticket);
         
         // Notificar cambio de estado
-        if (newStatus == EstadoTicket.CALLED) {
+        if (newStatus == TicketStatus.CALLED) {
             telegramService.programarMensaje(updatedTicket, com.example.ticketero.model.enums.MessageTemplate.TOTEM_ES_TU_TURNO);
         }
         
@@ -95,7 +95,7 @@ public class TicketService {
     }
     
     private void validateNoActiveTicket(String nationalId) {
-        List<EstadoTicket> activeStatuses = List.of(EstadoTicket.WAITING, EstadoTicket.CALLED, EstadoTicket.IN_PROGRESS);
+        List<TicketStatus> activeStatuses = List.of(TicketStatus.WAITING, TicketStatus.CALLED, TicketStatus.IN_SERVICE);
         
         Optional<Ticket> existingTicket = ticketRepository.findByNationalIdAndStatusIn(nationalId, activeStatuses);
         if (existingTicket.isPresent()) {

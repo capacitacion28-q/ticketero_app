@@ -1,7 +1,7 @@
 package com.example.ticketero.service;
 
 import com.example.ticketero.model.dto.QueueStatusResponse;
-import com.example.ticketero.model.entity.EstadoTicket;
+import com.example.ticketero.model.enums.TicketStatus;
 import com.example.ticketero.model.enums.QueueType;
 import com.example.ticketero.repository.TicketRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +26,7 @@ public class QueueService {
     
     public int calculateQueuePosition(QueueType queueType) {
         // RN-002: Calcular posición basada en tickets en espera
-        long waitingTickets = ticketRepository.countByStatusAndQueueType(EstadoTicket.WAITING, queueType);
+        long waitingTickets = ticketRepository.countByStatusAndQueueType(TicketStatus.WAITING, queueType);
         return (int) waitingTickets + 1;
     }
     
@@ -40,9 +40,9 @@ public class QueueService {
         log.debug("Getting queue status for: {}", queueType);
         
         // Contar tickets por estado
-        int ticketsEnEspera = (int) ticketRepository.countByStatusAndQueueType(EstadoTicket.WAITING, queueType);
-        int ticketsNotificados = (int) ticketRepository.countByStatusAndQueueType(EstadoTicket.CALLED, queueType);
-        int ticketsEnAtencion = (int) ticketRepository.countByStatusAndQueueType(EstadoTicket.IN_PROGRESS, queueType);
+        int ticketsEnEspera = (int) ticketRepository.countByStatusAndQueueType(TicketStatus.WAITING, queueType);
+        int ticketsNotificados = (int) ticketRepository.countByStatusAndQueueType(TicketStatus.CALLED, queueType);
+        int ticketsEnAtencion = (int) ticketRepository.countByStatusAndQueueType(TicketStatus.IN_SERVICE, queueType);
         
         // Calcular tiempo estimado total de la cola
         int tiempoEstimadoCola = ticketsEnEspera * queueType.getAvgTimeMinutes();
@@ -74,7 +74,7 @@ public class QueueService {
     }
     
     private String getNextTicketNumber(QueueType queueType) {
-        return ticketRepository.findByStatusOrderByFechaCreacionAsc(EstadoTicket.WAITING)
+        return ticketRepository.findByStatusOrderByFechaCreacionAsc(TicketStatus.WAITING)
             .stream()
             .filter(ticket -> ticket.getQueueType() == queueType)
             .findFirst()
@@ -83,7 +83,7 @@ public class QueueService {
     }
     
     private List<QueueStatusResponse.TicketEnCola> getTicketsInQueue(QueueType queueType) {
-        return ticketRepository.findByStatusOrderByFechaCreacionAsc(EstadoTicket.WAITING)
+        return ticketRepository.findByStatusOrderByFechaCreacionAsc(TicketStatus.WAITING)
             .stream()
             .filter(ticket -> ticket.getQueueType() == queueType)
             .limit(10) // Mostrar solo los primeros 10

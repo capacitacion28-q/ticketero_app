@@ -1,7 +1,7 @@
 package com.example.ticketero.test;
 
 import com.example.ticketero.repository.*;
-import com.example.ticketero.model.entity.EstadoTicket;
+import com.example.ticketero.model.enums.TicketStatus;
 import com.example.ticketero.model.enums.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -62,7 +62,7 @@ public class RepositoryValidationTest implements CommandLineRunner {
         
         // Test query derivadas
         System.out.println("   🔍 Tickets por estado WAITING: " + 
-            ticketRepository.countByStatusAndQueueType(EstadoTicket.WAITING, QueueType.CAJA));
+            ticketRepository.countByStatusAndQueueType(TicketStatus.WAITING, QueueType.CAJA));
         
         System.out.println("   🔍 Mensajes pendientes: " + 
             mensajeRepository.findByEstadoEnvioOrderByFechaCreacionAsc(EstadoEnvio.PENDIENTE).size());

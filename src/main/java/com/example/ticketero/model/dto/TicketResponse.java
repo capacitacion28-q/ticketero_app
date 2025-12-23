@@ -1,7 +1,7 @@
 package com.example.ticketero.model.dto;
 
 import com.example.ticketero.model.entity.Ticket;
-import com.example.ticketero.model.entity.EstadoTicket;
+import com.example.ticketero.model.enums.TicketStatus;
 import com.example.ticketero.model.enums.QueueType;
 
 import java.time.LocalDateTime;
@@ -18,7 +18,7 @@ public record TicketResponse(
     String telefono,
     String branchOffice,
     QueueType queueType,
-    EstadoTicket status,
+    TicketStatus status,
     Integer positionInQueue,
     Integer estimatedWaitMinutes,
     String assignedAdvisor,

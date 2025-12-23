@@ -2,7 +2,7 @@ package com.example.ticketero.service;
 
 import com.example.ticketero.model.entity.Mensaje;
 import com.example.ticketero.model.entity.Ticket;
-import com.example.ticketero.model.entity.EstadoTicket;
+import com.example.ticketero.model.enums.TicketStatus;
 import com.example.ticketero.model.enums.EstadoEnvio;
 import com.example.ticketero.model.enums.MessageTemplate;
 import com.example.ticketero.repository.MensajeRepository;

@@ -1,7 +1,7 @@
 package com.example.ticketero.model.entity;
 
 import com.example.ticketero.model.enums.QueueType;
-import com.example.ticketero.model.entity.EstadoTicket;
+import com.example.ticketero.model.enums.TicketStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -45,7 +45,7 @@ public class Ticket {
     
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private EstadoTicket status;
+    private TicketStatus status;
     
     @Column(name = "position_in_queue", nullable = false)
     private Integer positionInQueue;

@@ -2,7 +2,7 @@ package com.example.ticketero.service;
 
 import com.example.ticketero.model.entity.Mensaje;
 import com.example.ticketero.model.entity.Ticket;
-import com.example.ticketero.model.entity.EstadoTicket;
+import com.example.ticketero.model.enums.TicketStatus;
 import com.example.ticketero.model.enums.EstadoEnvio;
 import com.example.ticketero.model.enums.MessageTemplate;
 import com.example.ticketero.repository.MensajeRepository;
@@ -51,7 +51,7 @@ public class NotificationService {
     }
     
     @Transactional
-    public void sendStatusChangeNotification(Ticket ticket, EstadoTicket oldStatus) {
+    public void sendStatusChangeNotification(Ticket ticket, TicketStatus oldStatus) {
         log.info("Sending status change notification for ticket: {} ({} -> {})", 
                 ticket.getNumero(), oldStatus, ticket.getStatus());
         
@@ -114,10 +114,10 @@ public class NotificationService {
         }
     }
     
-    private MessageTemplate getTemplateForStatusChange(EstadoTicket newStatus) {
+    private MessageTemplate getTemplateForStatusChange(TicketStatus newStatus) {
         return switch (newStatus) {
             case CALLED -> MessageTemplate.TOTEM_ES_TU_TURNO;
-            case IN_PROGRESS -> null; // No notificar cuando está en atención
+            case IN_SERVICE -> null; // No notificar cuando está en atención
             case COMPLETED, CANCELLED -> null; // No notificar al completar/cancelar
             default -> null;
         };

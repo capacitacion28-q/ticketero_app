@@ -17,6 +17,9 @@ import java.util.List;
 @Repository
 public interface MensajeRepository extends JpaRepository<Mensaje, Long> {
     
+    // Mensajes pendientes para procesamiento - SCHEDULER
+    List<Mensaje> findByEstadoEnvioAndFechaProgramadaBefore(EstadoEnvio estadoEnvio, LocalDateTime fecha);
+    
     // Mensajes por ticket
     List<Mensaje> findByTicketIdOrderByFechaCreacionDesc(Long ticketId);
     

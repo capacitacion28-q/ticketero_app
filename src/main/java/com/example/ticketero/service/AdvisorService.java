@@ -2,7 +2,7 @@ package com.example.ticketero.service;
 
 import com.example.ticketero.model.entity.Advisor;
 import com.example.ticketero.model.entity.Ticket;
-import com.example.ticketero.model.entity.EstadoTicket;
+import com.example.ticketero.model.enums.TicketStatus;
 import com.example.ticketero.model.enums.AdvisorStatus;
 import com.example.ticketero.repository.AdvisorRepository;
 import com.example.ticketero.repository.TicketRepository;
@@ -43,7 +43,7 @@ public class AdvisorService {
         }
         
         // Buscar próximo ticket en espera (por orden de llegada)
-        Optional<Ticket> nextTicket = ticketRepository.findByStatusOrderByFechaCreacionAsc(EstadoTicket.WAITING)
+        Optional<Ticket> nextTicket = ticketRepository.findByStatusOrderByFechaCreacionAsc(TicketStatus.WAITING)
             .stream()
             .findFirst();
         
@@ -65,7 +65,7 @@ public class AdvisorService {
                 ticket.getNumero(), advisor.getName(), advisor.getModuleNumber());
         
         // Actualizar ticket
-        ticket.setStatus(EstadoTicket.CALLED);
+        ticket.setStatus(TicketStatus.CALLED);
         ticket.setAssignedAdvisor(advisor.getName());
         ticket.setAssignedModuleNumber(advisor.getModuleNumber());
         ticket.setFechaActualizacion(LocalDateTime.now());
@@ -80,7 +80,7 @@ public class AdvisorService {
         advisorRepository.save(advisor);
         
         // Enviar notificación al cliente
-        notificationService.sendStatusChangeNotification(savedTicket, EstadoTicket.WAITING);
+        notificationService.sendStatusChangeNotification(savedTicket, TicketStatus.WAITING);
         
         log.info("Ticket {} assigned successfully to module {}", 
                 savedTicket.getNumero(), advisor.getModuleNumber());
@@ -101,7 +101,7 @@ public class AdvisorService {
         }
         
         // Actualizar ticket
-        ticket.setStatus(EstadoTicket.COMPLETED);
+        ticket.setStatus(TicketStatus.COMPLETED);
         ticket.setFechaActualizacion(LocalDateTime.now());
         
         // Liberar asesor

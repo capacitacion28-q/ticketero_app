@@ -2,7 +2,7 @@ package com.example.ticketero.repository;
 
 import com.example.ticketero.model.entity.Ticket;
 import com.example.ticketero.model.enums.QueueType;
-import com.example.ticketero.model.entity.EstadoTicket;
+import com.example.ticketero.model.enums.TicketStatus;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -28,16 +28,16 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     Optional<Ticket> findByNumero(String numero);
     
     // RN-001: Ticket activo por nationalId - ESPECIFICACIÓN EXACTA DEL PLAN
-    Optional<Ticket> findByNationalIdAndStatusIn(String nationalId, List<EstadoTicket> statuses);
+    Optional<Ticket> findByNationalIdAndStatusIn(String nationalId, List<TicketStatus> statuses);
     
     // Tickets por estado - ESPECIFICACIÓN EXACTA DEL PLAN
-    List<Ticket> findByStatusOrderByFechaCreacionAsc(EstadoTicket status);
+    List<Ticket> findByStatusOrderByFechaCreacionAsc(TicketStatus status);
     
     // Contar tickets en cola por tipo - RN-003
-    long countByStatusAndQueueType(EstadoTicket status, QueueType queueType);
+    long countByStatusAndQueueType(TicketStatus status, QueueType queueType);
     
     // Tickets activos por sucursal
-    List<Ticket> findByBranchOfficeAndStatusInOrderByFechaCreacionAsc(String branchOffice, List<EstadoTicket> statuses);
+    List<Ticket> findByBranchOfficeAndStatusInOrderByFechaCreacionAsc(String branchOffice, List<TicketStatus> statuses);
     
     // Query para calcular posición en cola - RN-002
     @Query("""
@@ -48,7 +48,7 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
         """)
     int calculatePositionInQueue(
         @Param("queueType") QueueType queueType,
-        @Param("status") EstadoTicket status,
+        @Param("status") TicketStatus status,
         @Param("fechaCreacion") LocalDateTime fechaCreacion
     );
     
@@ -62,7 +62,11 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     Optional<Ticket> findNextTicketByPriority(@Param("queueType") QueueType queueType);
     
     // Tickets por asesor asignado
-    List<Ticket> findByAssignedAdvisorAndStatusOrderByFechaActualizacionDesc(String advisor, EstadoTicket status);
+    List<Ticket> findByAssignedAdvisorAndStatusOrderByFechaActualizacionDesc(String advisor, TicketStatus status);
+    
+    // Tickets con timeout para NO_SHOW - SCHEDULER - ESPECIFICACIÓN EXACTA DEL PLAN
+    @Query("SELECT t FROM Ticket t WHERE t.status = 'CALLED' AND t.fechaActualizacion < :timeoutThreshold")
+    List<Ticket> findCalledOlderThan(@Param("timeoutThreshold") LocalDateTime timeoutThreshold);
     
     // Estadísticas por rango de fechas - RF-004 (simplificada)
     @Query("""

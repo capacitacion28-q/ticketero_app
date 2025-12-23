@@ -1,7 +1,7 @@
 package com.example.ticketero.service;
 
 import com.example.ticketero.model.dto.DashboardResponse;
-import com.example.ticketero.model.entity.EstadoTicket;
+import com.example.ticketero.model.enums.TicketStatus;
 import com.example.ticketero.model.enums.AdvisorStatus;
 import com.example.ticketero.model.enums.QueueType;
 import com.example.ticketero.repository.AdvisorRepository;
@@ -64,7 +64,7 @@ public class DashboardService {
     
     private DashboardResponse.ResumenEjecutivo generateResumenEjecutivo(LocalDateTime startOfDay, LocalDateTime now) {
         // Tickets activos (en espera + llamados + en progreso)
-        List<EstadoTicket> activeStatuses = List.of(EstadoTicket.WAITING, EstadoTicket.CALLED, EstadoTicket.IN_PROGRESS);
+        List<TicketStatus> activeStatuses = List.of(TicketStatus.WAITING, TicketStatus.CALLED, TicketStatus.IN_SERVICE);
         int ticketsActivos = activeStatuses.stream()
             .mapToInt(status -> (int) ticketRepository.countByStatusAndQueueType(status, QueueType.CAJA) +
                                (int) ticketRepository.countByStatusAndQueueType(status, QueueType.PERSONAL_BANKER) +
@@ -74,7 +74,7 @@ public class DashboardService {
         
         // Tickets completados hoy
         int ticketsCompletadosHoy = (int) Arrays.stream(QueueType.values())
-            .mapToLong(queueType -> ticketRepository.countByStatusAndQueueType(EstadoTicket.COMPLETED, queueType))
+            .mapToLong(queueType -> ticketRepository.countByStatusAndQueueType(TicketStatus.COMPLETED, queueType))
             .sum();
         
         // Tiempo promedio global (simulado)
@@ -96,7 +96,7 @@ public class DashboardService {
         Map<String, DashboardResponse.EstadoCola> estadoColas = new HashMap<>();
         
         for (QueueType queueType : QueueType.values()) {
-            int ticketsEnEspera = (int) ticketRepository.countByStatusAndQueueType(EstadoTicket.WAITING, queueType);
+            int ticketsEnEspera = (int) ticketRepository.countByStatusAndQueueType(TicketStatus.WAITING, queueType);
             int tiempoEstimadoMaximo = ticketsEnEspera * queueType.getAvgTimeMinutes();
             String estado = determineQueueState(ticketsEnEspera, queueType);
             
@@ -149,7 +149,7 @@ public class DashboardService {
         
         // Alerta por colas saturadas
         for (QueueType queueType : QueueType.values()) {
-            int ticketsEnEspera = (int) ticketRepository.countByStatusAndQueueType(EstadoTicket.WAITING, queueType);
+            int ticketsEnEspera = (int) ticketRepository.countByStatusAndQueueType(TicketStatus.WAITING, queueType);
             if (ticketsEnEspera > 10) { // Umbral de saturación
                 alertas.add(new DashboardResponse.Alerta(
                     "QUEUE_OVERFLOW_" + queueType.name(),
@@ -184,7 +184,7 @@ public class DashboardService {
         // Métricas por cola
         for (QueueType queueType : QueueType.values()) {
             String key = "tickets_" + queueType.name().toLowerCase();
-            int count = (int) ticketRepository.countByStatusAndQueueType(EstadoTicket.COMPLETED, queueType);
+            int count = (int) ticketRepository.countByStatusAndQueueType(TicketStatus.COMPLETED, queueType);
             metricas.put(key, count);
         }
         

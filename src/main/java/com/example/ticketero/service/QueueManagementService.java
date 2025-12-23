@@ -2,7 +2,7 @@ package com.example.ticketero.service;
 
 import com.example.ticketero.model.entity.Advisor;
 import com.example.ticketero.model.entity.Ticket;
-import com.example.ticketero.model.entity.EstadoTicket;
+import com.example.ticketero.model.enums.TicketStatus;
 import com.example.ticketero.model.enums.*;
 import com.example.ticketero.repository.AdvisorRepository;
 import com.example.ticketero.repository.TicketRepository;
@@ -59,7 +59,7 @@ public class QueueManagementService {
         
         Advisor asesor = availableAdvisors.get(0); // Tomar el primero disponible
         
-        ticket.setStatus(EstadoTicket.CALLED);
+        ticket.setStatus(TicketStatus.CALLED);
         ticket.setAssignedAdvisor(asesor.getName());
         ticket.setAssignedModuleNumber(asesor.getModuleNumber());
         
@@ -81,7 +81,7 @@ public class QueueManagementService {
     
     // RN-012: Pre-aviso cuando posición ≤ 3 (simplificado)
     public void recalcularPosiciones(QueueType queueType) {
-        List<Ticket> tickets = ticketRepository.findByStatusOrderByFechaCreacionAsc(EstadoTicket.WAITING);
+        List<Ticket> tickets = ticketRepository.findByStatusOrderByFechaCreacionAsc(TicketStatus.WAITING);
         
         for (int i = 0; i < Math.min(tickets.size(), 10); i++) {
             Ticket ticket = tickets.get(i);
@@ -94,8 +94,8 @@ public class QueueManagementService {
             ticket.setEstimatedWaitMinutes(newEstimatedTime);
             
             // RN-012: Pre-aviso automático
-            if (newPosition <= 3 && ticket.getStatus() == EstadoTicket.WAITING) {
-                ticket.setStatus(EstadoTicket.CALLED);
+            if (newPosition <= 3 && ticket.getStatus() == TicketStatus.WAITING) {
+                ticket.setStatus(TicketStatus.CALLED);
                 telegramService.programarMensaje(ticket, MessageTemplate.TOTEM_PROXIMO_TURNO);
                 log.info("Pre-aviso enviado para ticket {} en posición {}", 
                         ticket.getNumero(), newPosition);
