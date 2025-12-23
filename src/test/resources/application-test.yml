@@ -1,0 +1,35 @@
+# Configuración de test para Sistema Ticketero
+# Usa H2 en memoria para tests rápidos sin dependencia de PostgreSQL
+
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 
+  
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    
+  flyway:
+    enabled: false  # Deshabilitado para tests con H2
+
+# Configuración mínima para tests
+scheduler:
+  message:
+    fixed-rate: 300000  # 5 minutos para tests
+  queue:
+    fixed-rate: 60000   # 1 minuto para tests
+
+telegram:
+  bot:
+    token: test-token
+    api-url: http://localhost:8080/mock
+    timeout: 5000
+
+logging:
+  level:
+    com.example.ticketero: DEBUG
+    org.springframework.retry: DEBUG

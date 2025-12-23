@@ -1,0 +1,59 @@
+# Docker Compose para Sistema Ticketero
+# Configuración de PostgreSQL según stack tecnológico definido
+
+version: '3.8'
+
+services:
+  # Base de datos PostgreSQL 15
+  postgres:
+    image: postgres:15-alpine
+    container_name: ticketero-postgres
+    environment:
+      POSTGRES_DB: ticketero_db
+      POSTGRES_USER: ticketero_user
+      POSTGRES_PASSWORD: ticketero_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      # Persistencia de datos
+      - postgres_data:/var/lib/postgresql/data
+      # Scripts de inicialización si son necesarios
+      - ./docker/init:/docker-entrypoint-initdb.d
+    networks:
+      - ticketero-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ticketero_user -d ticketero_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Aplicación Spring Boot (opcional para desarrollo)
+  ticketero-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ticketero-app
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ticketero_db
+      SPRING_DATASOURCE_USERNAME: ticketero_user
+      SPRING_DATASOURCE_PASSWORD: ticketero_pass
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-dummy-token}
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - ticketero-network
+    restart: unless-stopped
+    profiles:
+      - full  # Solo se ejecuta con --profile full
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  ticketero-network:
+    driver: bridge
