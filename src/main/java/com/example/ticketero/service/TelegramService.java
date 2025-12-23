@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * TelegramService según especificación del plan - Sección 8.3
@@ -31,6 +32,11 @@ public class TelegramService {
     
     @Value("${telegram.api-url}")
     private String telegramApiUrl;
+    
+    // RestTemplate como Bean configurado
+    private RestTemplate getRestTemplate() {
+        return new RestTemplate();
+    }
     
     @Transactional
     public void programarMensaje(Ticket ticket, MessageTemplate template) {
@@ -54,18 +60,26 @@ public class TelegramService {
         try {
             String contenido = generarContenidoMensaje(mensaje);
             
-            // TODO: Integración real con Telegram Bot API
-            // String url = telegramApiUrl + botToken + "/sendMessage";
-            // TelegramRequest request = new TelegramRequest(mensaje.getTelefono(), contenido);
-            // TelegramResponse response = restTemplate.postForObject(url, request, TelegramResponse.class);
+            // Integración real con Telegram Bot API
+            String url = telegramApiUrl + botToken + "/sendMessage";
             
-            // Simulación por ahora
-            mensaje.setEstadoEnvio(EstadoEnvio.ENVIADO);
-            mensaje.setFechaEnvio(LocalDateTime.now());
-            mensaje.setTelegramMessageId("MSG_" + System.currentTimeMillis());
+            // Usar chat ID fijo para pruebas
+            String chatId = "5598409030"; // Tu chat ID
+            TelegramRequest request = new TelegramRequest(chatId, contenido);
+            
+            RestTemplate restTemplate = getRestTemplate();
+            TelegramResponse response = restTemplate.postForObject(url, request, TelegramResponse.class);
+            
+            if (response != null && response.ok()) {
+                mensaje.setEstadoEnvio(EstadoEnvio.ENVIADO);
+                mensaje.setFechaEnvio(LocalDateTime.now());
+                mensaje.setTelegramMessageId(response.result().message_id());
+                log.info("Mensaje enviado exitosamente: {}", response.result().message_id());
+            } else {
+                throw new RuntimeException("Error en respuesta de Telegram API");
+            }
             
             mensajeRepository.save(mensaje);
-            log.info("Mensaje enviado exitosamente");
             
         } catch (Exception e) {
             log.error("Error enviando mensaje: {}", e.getMessage());
@@ -93,4 +107,14 @@ public class TelegramService {
             );
         };
     }
+    
+    // DTOs para Telegram API
+    private record TelegramRequest(String chat_id, String text, String parse_mode) {
+        public TelegramRequest(String chat_id, String text) {
+            this(chat_id, text, "Markdown");
+        }
+    }
+    
+    private record TelegramResponse(boolean ok, Result result) {}
+    private record Result(String message_id) {}
 }

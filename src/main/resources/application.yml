@@ -40,7 +40,7 @@ scheduler:
 
 # Configuración Telegram Bot API según ADR-002
 telegram:
-  bot-token: ${TELEGRAM_BOT_TOKEN:dummy-token-for-dev}
+  bot-token: "8450583015:AAFtvB0Ljq2330--0LkHbmq-PaA0S87Zr9A"
   api-url: https://api.telegram.org/bot
   timeout: ${TELEGRAM_TIMEOUT:30000}
     

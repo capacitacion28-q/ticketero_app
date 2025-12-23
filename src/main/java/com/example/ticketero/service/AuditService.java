@@ -150,21 +150,34 @@ public class AuditService {
         log.debug("Audit logged: NOTIFICATION_SENT for ticket {}", ticketNumber);
     }
     
+    // Método faltante para compatibilidad con QueueManagementService
     @Transactional
-    public void logQueueQuery(String queueType, String clientIp) {
+    public void registrarEvento(String eventType, String actor, Long ticketId, 
+                               String previousState, String newState, String additionalData) {
+        
+        ActorType actorType = determinarActorType(actor);
+        
         AuditEvent event = AuditEvent.builder()
-            .timestamp(LocalDateTime.now())
-            .eventType("QUEUE_CONSULTED")
-            .actor("ANONYMOUS")
-            .actorType(ActorType.CLIENT)
-            .ticketNumber(null)
-            .previousState(null)
-            .newState(null)
-            .additionalData(String.format("Queue: %s", queueType))
-            .ipAddress(clientIp)
+            .eventType(eventType)
+            .actor(actor)
+            .actorType(actorType)
+            .previousState(previousState)
+            .newState(newState)
+            .additionalData(additionalData)
             .build();
+            
+        if (ticketId != null) {
+            event.setTicketNumber("TICKET_" + ticketId);
+        }
         
         auditEventRepository.save(event);
-        log.debug("Audit logged: QUEUE_CONSULTED for {}", queueType);
+        log.debug("Evento de auditoría registrado: {} por {}", eventType, actor);
+    }
+    
+    private ActorType determinarActorType(String actor) {
+        if ("SYSTEM".equals(actor)) return ActorType.SYSTEM;
+        if (actor.contains("@")) return ActorType.SUPERVISOR;
+        if (actor.matches("\\d{7,8}-[0-9Kk]")) return ActorType.CLIENT;
+        return ActorType.ADVISOR;
     }
 }

@@ -52,14 +52,20 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
         @Param("fechaCreacion") LocalDateTime fechaCreacion
     );
     
-    // Próximo ticket por prioridad - ESPECIFICACIÓN EXACTA DEL PLAN
+    // Próximo ticket por prioridad - ESPECIFICACIÓN EXACTA DEL PLAN - CORREGIDA
     @Query("""
         SELECT t FROM Ticket t 
-        WHERE t.status = 'WAITING' 
-        AND t.queueType = :queueType
-        ORDER BY t.fechaCreacion ASC
+        WHERE t.status IN ('WAITING', 'NOTIFIED') 
+        ORDER BY 
+            CASE t.queueType 
+                WHEN 'GERENCIA' THEN 4
+                WHEN 'EMPRESAS' THEN 3
+                WHEN 'PERSONAL_BANKER' THEN 2
+                WHEN 'CAJA' THEN 1
+            END DESC,
+            t.fechaCreacion ASC
         """)
-    Optional<Ticket> findNextTicketByPriority(@Param("queueType") QueueType queueType);
+    List<Ticket> findNextTicketByPriority();
     
     // Tickets por asesor asignado
     List<Ticket> findByAssignedAdvisorAndStatusOrderByFechaActualizacionDesc(String advisor, TicketStatus status);

@@ -39,27 +39,27 @@ public class QueueManagementService {
         return new PositionInfo(position, estimatedTime);
     }
     
-    // RN-002, RN-003, RN-004: Asignación automática
+    // RN-002, RN-003, RN-004: Asignación automática - CORREGIDA
     public void asignarSiguienteTicket() {
-        // RN-002: Seleccionar ticket con mayor prioridad (simplificado)
-        Optional<Ticket> nextTicket = ticketRepository.findNextTicketByPriority(QueueType.CAJA);
-        if (nextTicket.isEmpty()) {
+        // RN-002: Seleccionar ticket con mayor prioridad
+        List<Ticket> nextTickets = ticketRepository.findNextTicketByPriority();
+        if (nextTickets.isEmpty()) {
             log.debug("No hay tickets pendientes para asignar");
             return;
         }
         
-        Ticket ticket = nextTicket.get();
+        Ticket ticket = nextTickets.get(0);
         
-        // RN-004: Balanceo de carga (simplificado)
-        List<Advisor> availableAdvisors = advisorRepository.findAll();
-        if (availableAdvisors.isEmpty()) {
+        // RN-004: Balanceo de carga - CORREGIDO
+        Optional<Advisor> advisor = advisorRepository.findFirstByStatusOrderByAssignedTicketsCountAscUpdatedAtAsc(AdvisorStatus.AVAILABLE);
+        if (advisor.isEmpty()) {
             log.debug("No hay ejecutivos disponibles");
             return;
         }
         
-        Advisor asesor = availableAdvisors.get(0); // Tomar el primero disponible
+        Advisor asesor = advisor.get();
         
-        ticket.setStatus(TicketStatus.CALLED);
+        ticket.setStatus(TicketStatus.IN_SERVICE);
         ticket.setAssignedAdvisor(asesor.getName());
         ticket.setAssignedModuleNumber(asesor.getModuleNumber());
         
@@ -69,8 +69,9 @@ public class QueueManagementService {
         ticketRepository.save(ticket);
         advisorRepository.save(asesor);
         
-        // Auditoría simplificada
-        log.info("Ticket {} asignado - auditoría registrada", ticket.getNumero());
+        // RN-011: Auditoría de asignación
+        auditService.registrarEvento("TICKET_ASSIGNED", "SYSTEM", ticket.getId(),
+                                    "WAITING", "IN_SERVICE", buildAssignmentData(asesor));
         
         // RF-002: Programar mensaje de turno activo
         telegramService.programarMensaje(ticket, MessageTemplate.TOTEM_ES_TU_TURNO);
