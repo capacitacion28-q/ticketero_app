@@ -77,7 +77,7 @@ public class TicketService {
     @Transactional
     public TicketResponse updateStatus(UUID codigoReferencia, EstadoTicket newStatus) {
         Ticket ticket = ticketRepository.findByCodigoReferencia(codigoReferencia)
-            .orElseThrow(() -> new RuntimeException("Ticket not found: " + codigoReferencia));
+            .orElseThrow(() -> new com.example.ticketero.exception.TicketNotFoundException("Ticket not found: " + codigoReferencia));
         
         EstadoTicket oldStatus = ticket.getStatus();
         ticket.setStatus(newStatus);
@@ -99,7 +99,7 @@ public class TicketService {
         
         Optional<Ticket> existingTicket = ticketRepository.findByNationalIdAndStatusIn(nationalId, activeStatuses);
         if (existingTicket.isPresent()) {
-            throw new RuntimeException("Ya existe un ticket activo para el RUT: " + nationalId);
+            throw new com.example.ticketero.exception.TicketActivoExistenteException("Ya existe un ticket activo para el RUT: " + nationalId);
         }
     }
     
