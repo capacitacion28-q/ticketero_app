@@ -40,21 +40,25 @@ scheduler:
   queue:
     # Procesamiento de colas cada 5 segundos
     fixed-rate: ${SCHEDULER_QUEUE_RATE:5000}
+  thread-pool-size: ${SCHEDULER_THREAD_POOL_SIZE:2}
 
 # Configuración Telegram Bot API según ADR-002
 telegram:
-  bot-token: ${TELEGRAM_BOT_TOKEN:8450583015:AAFtvB0Ljq2330--0LkHbmq-PaA0S87Zr9A}
-  api-url: https://api.telegram.org/bot
+  bot-token: ${TELEGRAM_BOT_TOKEN:dummy-token-change-me}
+  api-url: ${TELEGRAM_API_URL:https://api.telegram.org/bot}
   timeout: ${TELEGRAM_TIMEOUT:30000}
+  default-chat-id: ${TELEGRAM_DEFAULT_CHAT_ID:5598409030}
+  bot:
+    enabled: ${TELEGRAM_BOT_ENABLED:false}
     
 # Configuración de Reintentos según ADR-001 (RN-007, RN-008)
 retry:
   telegram:
-    max-attempts: 3
+    max-attempts: ${RETRY_MAX_ATTEMPTS:3}
     backoff:
-      initial-delay: 30000    # 30 segundos
-      multiplier: 2.0         # Backoff exponencial
-      max-delay: 120000       # 120 segundos máximo
+      initial-delay: ${RETRY_INITIAL_DELAY:30000}    # 30 segundos
+      multiplier: ${RETRY_MULTIPLIER:2.0}         # Backoff exponencial
+      max-delay: ${RETRY_MAX_DELAY:120000}       # 120 segundos máximo
 
 # Configuración de Auditoría según RN-011 y RN-013
 audit:

@@ -49,6 +49,9 @@ public class TelegramService {
     @Value("${telegram.api-url}")
     private String telegramApiUrl;
     
+    @Value("${telegram.default-chat-id:5598409030}")
+    private String defaultChatId;
+    
     // RestTemplate como Bean configurado
     private RestTemplate getRestTemplate() {
         return new RestTemplate();
@@ -92,8 +95,8 @@ public class TelegramService {
             // Integración real con Telegram Bot API
             String url = telegramApiUrl + botToken + "/sendMessage";
             
-            // Usar chat ID fijo para pruebas
-            String chatId = "5598409030"; // Tu chat ID
+            // Usar chat ID configurable
+            String chatId = defaultChatId;
             TelegramRequest request = new TelegramRequest(chatId, contenido);
             
             RestTemplate restTemplate = getRestTemplate();
