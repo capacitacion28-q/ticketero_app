@@ -32,6 +32,9 @@ class H2ConfigurationValidationIT extends BaseH2SimpleTest {
         // Given: Datos válidos de ticket
         String ticketRequest = """
             {
+                "titulo": "Test H2 Configuration",
+                "descripcion": "Validacion configuracion H2",
+                "usuarioId": 1,
                 "nationalId": "12345678-9",
                 "telefono": "+56987654321",
                 "branchOffice": "Sucursal Centro",
@@ -47,7 +50,7 @@ class H2ConfigurationValidationIT extends BaseH2SimpleTest {
             .post("/api/tickets")
         .then()
             .statusCode(201)
-            .body("numero", matchesPattern("C\\d{3}"))
+            .body("numero", matchesPattern("C\\d{2}"))
             .body("status", equalTo("WAITING"))
             .body("nationalId", equalTo("12345678-9"))
             .body("queueType", equalTo("CAJA"));
@@ -62,7 +65,9 @@ class H2ConfigurationValidationIT extends BaseH2SimpleTest {
             .get("/api/dashboard/summary")
         .then()
             .statusCode(200)
-            .body("totalTickets", greaterThanOrEqualTo(0));
+            .body("ticketsActivos", greaterThanOrEqualTo(0))
+            .body("ejecutivosDisponibles", greaterThanOrEqualTo(0))
+            .body("estadoGeneral", notNullValue());
 
         // Queue status
         given()
