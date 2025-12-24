@@ -2390,3 +2390,46 @@ And cada evento incluye hash de integridad verificable
 **Metodología:** Análisis de Requerimientos Senior con validación paso a paso  
 **Cumplimiento:** Estándar IEEE 830 para especificaciones de software
 
+
+---
+
+## DISCREPANCIAS CON IMPLEMENTACIÓN FINAL
+
+**Fecha de actualización:** 23 de Diciembre 2025  
+**Basado en:** Reporte de Consistencia Documental v1.0  
+**Propósito:** Documentar diferencias entre especificaciones originales y código implementado
+
+### Discrepancias Identificadas:
+
+**IC-002: Reset de Numeración de Tickets**
+- **Especificado originalmente:** Reset automático diario a medianoche (RN-005)
+- **Implementado en código:** Reset manual cuando se alcanza 99
+- **Tipo:** Desviación
+- **Impacto:** Funcionalidad simplificada vs especificación completa
+- **Referencia:** TicketService.resetTicketNumbers()
+
+**IC-003: Campos en TicketCreateRequest**
+- **Especificado originalmente:** nationalId, telefono, branchOffice, queueType (RF-001)
+- **Implementado en código:** Incluye campos adicionales (titulo, descripcion, usuarioId)
+- **Tipo:** Adición
+- **Impacto:** DTO más completo que especificación básica
+- **Referencia:** TicketCreateRequest.java
+
+**IC-004: Nomenclatura de Templates**
+- **Especificado originalmente:** totem_ticket_creado, totem_proximo_turno, totem_es_tu_turno
+- **Implementado en código:** TOTEM_TICKET_CREADO, TOTEM_PROXIMO_TURNO, TOTEM_ES_TU_TURNO
+- **Tipo:** Inconsistencia
+- **Impacto:** Diferencia en convención de nombres
+- **Referencia:** MessageTemplate enum
+
+**OM-003: Dashboard de Métricas**
+- **Especificado originalmente:** Dashboard con métricas específicas detalladas (RF-007)
+- **Implementado en código:** Dashboard básico implementado
+- **Tipo:** Omisión parcial
+- **Impacto:** Funcionalidad de monitoreo simplificada
+- **Referencia:** DashboardController
+
+### Estado de Alineación:
+- **Porcentaje de alineación:** 85%
+- **Elementos alineados:** 11
+- **Elementos con discrepancias:** 4

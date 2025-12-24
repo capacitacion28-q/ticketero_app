@@ -2721,3 +2721,42 @@ Base: Documentos de arquitectura y requerimientos funcionales aprobados
 **ALINEACIÓN TOTAL: 100%** ✅
 
 ---
+---
+
+## DISCREPANCIAS CON IMPLEMENTACIÓN FINAL
+
+**Fecha de actualización:** 23 de Diciembre 2025  
+**Basado en:** Reporte de Consistencia Documental v1.0  
+**Propósito:** Documentar diferencias entre especificaciones originales y código implementado
+
+### Discrepancias Identificadas:
+
+**IC-005: Implementación de Telegram API**
+- **Especificado originalmente:** Mock de Telegram para desarrollo
+- **Implementado en código:** API real con RestTemplate funcional
+- **Tipo:** Desviación positiva
+- **Impacto:** Implementación más avanzada que plan inicial
+- **Referencia:** TelegramService
+
+**OM-001: Documentación de Tests**
+- **Especificado originalmente:** Testing integral y de integración
+- **Implementado en código:** Solo 2 archivos de validación mencionados
+- **Tipo:** Omisión
+- **Impacto:** Cobertura de testing insuficiente documentada
+- **Referencia:** Estrategia de testing
+
+**ANE-001: Controllers de Testing**
+- **Especificado originalmente:** No encontrada especificación
+- **Implementado en código:** TelegramTestController y TestAssignmentController
+- **Tipo:** Adición
+- **Impacto:** Facilitar testing durante desarrollo
+- **Referencia:** Controllers adicionales
+
+### Componentes Implementados Adicionalmente:
+- **TelegramTestController:** Testing de integración Telegram
+- **TestAssignmentController:** Validación de asignaciones
+
+### Estado de Alineación:
+- **Porcentaje de alineación:** 80%
+- **Elementos alineados:** 16
+- **Elementos con discrepancias:** 3

@@ -1980,3 +1980,35 @@ La arquitectura diseñada garantiza el cumplimiento de los beneficios esperados:
 - Diagramas: `docs/architecture/diagrams/` (3 archivos .puml)
 - Configuración: Lista para deployment con Docker Compose
 - Migraciones: 4 scripts Flyway para PostgreSQL
+---
+
+## DISCREPANCIAS CON IMPLEMENTACIÓN FINAL
+
+**Fecha de actualización:** 23 de Diciembre 2025  
+**Basado en:** Reporte de Consistencia Documental v1.0  
+**Propósito:** Documentar diferencias entre especificaciones originales y código implementado
+
+### Discrepancias Identificadas:
+
+**OM-002: Configuración de Profiles**
+- **Especificado originalmente:** Configuración para dev/staging/prod
+- **Implementado en código:** Solo configuración base documentada
+- **Tipo:** Omisión
+- **Impacto:** Deployment en múltiples ambientes no documentado
+- **Referencia:** application.yml
+
+**ANE-002: Services Adicionales**
+- **Especificado originalmente:** Plan original de 6 services
+- **Implementado en código:** NotificationService y QueueService adicionales
+- **Tipo:** Adición
+- **Impacto:** Separación de responsabilidades mejorada
+- **Referencia:** Estructura de servicios implementados
+
+### Componentes Implementados Adicionalmente:
+- **NotificationService:** Gestión centralizada de notificaciones
+- **QueueService:** Lógica específica de manejo de colas
+
+### Estado de Alineación:
+- **Porcentaje de alineación:** 90%
+- **Elementos alineados:** 18
+- **Elementos con discrepancias:** 2
