@@ -30,10 +30,10 @@ docs\verify\05-performance-tests\run-basic-performance-tests.bat
 ### **🔧 Tests Individuales**
 ```bash
 # Test específico
-scripts\complete-latency-test.bat    # ~2 min
-scripts\complete-load-test.bat       # ~3 min
-scripts\complete-scheduler-test.bat  # ~5 min
-scripts\complete-telegram-test.bat   # ~3 min
+../../../scripts/complete-latency-test.bat    # ~2 min
+../../../scripts/complete-load-test.bat       # ~3 min
+../../../scripts/complete-scheduler-test.bat  # ~5 min
+../../../scripts/complete-telegram-test.bat   # ~3 min
 ```
 
 ---
@@ -208,20 +208,20 @@ curl http://localhost:8080/actuator/health
 ### **Desarrollo Diario**
 ```bash
 # Test rápido de latencia
-scripts\complete-latency-test.bat
+../../../scripts/complete-latency-test.bat
 
 # Tests básicos completos
-docs\verify\05-performance-tests\run-basic-performance-tests.bat
+docs\verify\03-performance-tests\run-basic-performance-tests.bat
 ```
 
 ### **Pre-Producción**
 ```bash
 # Suite completa de performance
-docs\verify\05-performance-tests\run-all-performance-tests.bat
+docs\verify\03-performance-tests\run-all-performance-tests.bat
 
 # Validación individual por componente
-scripts\complete-scheduler-test.bat
-scripts\complete-telegram-test.bat
+../../../scripts/complete-scheduler-test.bat
+../../../scripts/complete-telegram-test.bat
 ```
 
 ### **CI/CD Pipeline**
@@ -241,10 +241,10 @@ scripts\complete-telegram-test.bat
 - **performance-test-results.md** - Resultados históricos detallados
 
 ### **Scripts Individuales**
-- **scripts/complete-load-test.bat** - Test de carga completo
-- **scripts/complete-latency-test.bat** - Test de latencia completo
-- **scripts/complete-scheduler-test.bat** - Test de scheduler completo
-- **scripts/complete-telegram-test.bat** - Test de Telegram completo
+- **../../../scripts/complete-load-test.bat** - Test de carga completo
+- **../../../scripts/complete-latency-test.bat** - Test de latencia completo
+- **../../../scripts/complete-scheduler-test.bat** - Test de scheduler completo
+- **../../../scripts/complete-telegram-test.bat** - Test de Telegram completo
 
 ---
 

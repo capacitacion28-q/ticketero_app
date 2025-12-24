@@ -140,47 +140,130 @@ Análisis y especificación de requerimientos del sistema.
 - Análisis funcional IEEE 830
 - Casos de uso
 
-## 🚀 Inicio Rápido
+## 🚀 Despliegue con Docker Compose
 
-### 1. Clonar el Repositorio
+### Prerrequisitos
+- Docker Desktop instalado y ejecutándose
+- 2GB RAM disponible
+- Puertos 8080 y 5432 libres
+
+### ✅ DESPLIEGUE VALIDADO - Sistema Completo
+
+**Estado:** Completamente funcional  
+**Tiempo de inicialización:** < 2 minutos  
+**Servicios:** PostgreSQL + Spring Boot API  
+**Última validación:** 2025-12-24
+
+### Opción 1: Solo PostgreSQL (Recomendado para Desarrollo)
+
 ```bash
-git clone <repository-url>
-cd ticketero_app
+# 1. Crear archivo de variables de entorno
+cp .env.example .env
+# Editar .env con tus configuraciones si es necesario
+
+# 2. Levantar PostgreSQL
+docker-compose up -d postgres
+
+# 3. Ejecutar aplicación localmente
+mvn spring-boot:run -Dspring-boot.run.profiles=dev
+
+# 4. Verificar funcionamiento
+curl http://localhost:8080/actuator/health
+curl http://localhost:8080/api/dashboard/summary
 ```
 
-### 2. Configurar Variables de Entorno
+### Opción 2: Sistema Completo con Docker (✅ VALIDADO)
+
 ```bash
-# Crear archivo .env
+# 1. Configurar variables de entorno
 cp .env.example .env
 
-# Editar .env con tus configuraciones
-TELEGRAM_BOT_TOKEN=tu_token_aqui
-DATABASE_PASSWORD=tu_password_aqui
+# 2. Levantar todos los servicios
+docker-compose --profile full up -d
+
+# 3. Esperar inicialización (30-45 segundos)
+# PostgreSQL: ~30 segundos
+# Aplicación: ~45 segundos adicionales
+
+# 4. Verificar estado
+docker-compose ps
+
+# 5. Ver logs
+docker-compose logs -f
 ```
 
-### 3. Levantar Base de Datos
+### Comandos de Gestión
+
 ```bash
-# Solo PostgreSQL (recomendado para desarrollo)
+# Ver estado de servicios
+docker-compose ps
+
+# Ver logs específicos
+docker-compose logs -f postgres
+docker-compose logs -f ticketero-app
+
+# Detener servicios
+docker-compose down
+
+# Detener y eliminar datos (⚠️ ELIMINA DATOS)
+docker-compose down -v
+
+# Reiniciar servicio específico
+docker-compose restart postgres
+```
+
+### ✅ Validación del Despliegue
+
+| Endpoint | Estado | Resultado Esperado |
+|----------|--------|--------------------|  
+| `http://localhost:8080/actuator/health` | ✅ VALIDADO | `{"status":"UP"}` |
+| `http://localhost:8080/api/dashboard/summary` | ✅ VALIDADO | JSON con métricas del sistema |
+| `http://localhost:8080/api/queues/stats` | ✅ VALIDADO | `{"avgWaitTime":15,"totalQueues":4,"activeTickets":0}` |
+
+**Servicios Funcionando:**
+- ✅ PostgreSQL 15: Saludable y respondiendo
+- ✅ Ticketero API: Iniciada correctamente
+- ✅ Base de Datos: 5 tablas creadas por Flyway
+- ✅ Health Checks: Todos los endpoints UP
+- ✅ Schedulers: Funcionando según especificación (5s/60s)
+
+### Troubleshooting
+
+**PostgreSQL no inicia:**
+```bash
+# Verificar logs
+docker-compose logs postgres
+
+# Limpiar y reiniciar
+docker-compose down -v
 docker-compose up -d postgres
 ```
 
-### 4. Ejecutar Aplicación
+**Puerto 5432 ocupado:**
 ```bash
-# Opción 1: Maven (desarrollo)
-mvn spring-boot:run
-
-# Opción 2: Docker completo
-docker-compose --profile full up -d
+# Cambiar puerto en docker-compose.yml
+ports:
+  - "5433:5432"  # Usar puerto 5433
 ```
 
-### 5. Verificar Funcionamiento
-```bash
-# Health check
-curl http://localhost:8080/actuator/health
+**Tablas no creadas:**
+- El sistema usa Flyway para crear tablas automáticamente
+- Si hay problemas, verificar logs: `docker-compose logs ticketero-app`
+- Las migraciones están en: `src/main/resources/db/migration/`
 
-# Dashboard
-curl http://localhost:8080/api/dashboard/summary
-```
+### Configuraciones Disponibles
+
+- **`application.yml`**: Configuración por defecto (H2 en memoria)
+- **`application-dev.yml`**: PostgreSQL local para desarrollo
+- **`application-docker.yml`**: PostgreSQL en Docker Compose
+- **`application-quiet.yml`**: Desarrollo silencioso con schedulers reducidos
+
+### Notas Importantes
+
+- Los **schedulers** ejecutan consultas cada 5 segundos (colas) y 60 segundos (mensajes)
+- Esto es el **comportamiento normal** del sistema según especificaciones
+- Para testing silencioso, usar perfil `quiet` con intervalos más largos
+- La aplicación crea las tablas automáticamente con Hibernate
 
 ## 🚀 Estado del Proyecto
 

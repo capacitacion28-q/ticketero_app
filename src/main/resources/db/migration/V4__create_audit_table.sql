@@ -11,7 +11,7 @@ CREATE TABLE audit_event (
     ticket_number VARCHAR(10),
     previous_state VARCHAR(20),
     new_state VARCHAR(20),
-    additional_data JSONB,
+    additional_data TEXT,
     ip_address VARCHAR(45),
     integrity_hash VARCHAR(64) NOT NULL
 );

@@ -1,8 +1,6 @@
 # Docker Compose para Sistema Ticketero
 # Configuración de PostgreSQL según stack tecnológico definido
 
-version: '3.8'
-
 services:
   # Base de datos PostgreSQL 15
   postgres:
@@ -35,9 +33,10 @@ services:
       dockerfile: Dockerfile
     container_name: ticketero-app
     environment:
+      SPRING_PROFILES_ACTIVE: docker
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ticketero_db
-      SPRING_DATASOURCE_USERNAME: ticketero_user
-      SPRING_DATASOURCE_PASSWORD: ticketero_pass
+      SPRING_DATASOURCE_USERNAME: ${DATABASE_USER:-ticketero_user}
+      SPRING_DATASOURCE_PASSWORD: ${DATABASE_PASSWORD:-ticketero_pass}
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-dummy-token}
     ports:
       - "8080:8080"

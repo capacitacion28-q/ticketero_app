@@ -10,7 +10,7 @@ echo [INFO] Ejecutando tests basicos de performance...
 echo.
 
 echo [1/2] API Latency Test (Rapido)...
-call scripts\complete-latency-test.bat
+call ..\..\..\scripts\complete-latency-test.bat
 if %errorlevel% neq 0 (
     echo [ERROR] Latency Test fallo
     exit /b 1
@@ -18,7 +18,7 @@ if %errorlevel% neq 0 (
 
 echo.
 echo [2/2] API Load Test (Basico)...
-call scripts\complete-load-test.bat
+call ..\..\..\scripts\complete-load-test.bat
 if %errorlevel% neq 0 (
     echo [ERROR] Load Test fallo
     exit /b 1

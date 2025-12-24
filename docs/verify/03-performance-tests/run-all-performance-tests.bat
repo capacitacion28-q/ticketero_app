@@ -10,7 +10,7 @@ echo [INFO] Ejecutando 4 tests de performance...
 echo.
 
 echo [1/4] API Load Test...
-call scripts\complete-load-test.bat
+call ..\..\..\scripts\complete-load-test.bat
 if %errorlevel% neq 0 (
     echo [ERROR] Load Test fallo
     exit /b 1
@@ -18,7 +18,7 @@ if %errorlevel% neq 0 (
 
 echo.
 echo [2/4] API Latency Test...
-call scripts\complete-latency-test.bat
+call ..\..\..\scripts\complete-latency-test.bat
 if %errorlevel% neq 0 (
     echo [ERROR] Latency Test fallo
     exit /b 1
@@ -26,7 +26,7 @@ if %errorlevel% neq 0 (
 
 echo.
 echo [3/4] Scheduler Test...
-call scripts\complete-scheduler-test.bat
+call ..\..\..\scripts\complete-scheduler-test.bat
 if %errorlevel% neq 0 (
     echo [ERROR] Scheduler Test fallo
     exit /b 1
@@ -34,7 +34,7 @@ if %errorlevel% neq 0 (
 
 echo.
 echo [4/4] Telegram Test...
-call scripts\complete-telegram-test.bat
+call ..\..\..\scripts\complete-telegram-test.bat
 if %errorlevel% neq 0 (
     echo [ERROR] Telegram Test fallo
     exit /b 1
