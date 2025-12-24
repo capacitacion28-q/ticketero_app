@@ -39,7 +39,7 @@ public class TelegramTestController {
     @Value("${telegram.bot-token}")
     private String botToken;
 
-    @Value("${telegram.api-url}")
+    @Value("${telegram.api-url:https://api.telegram.org/bot}")
     private String telegramApiUrl;
 
     private final RestTemplate restTemplate = new RestTemplate();
