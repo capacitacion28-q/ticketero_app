@@ -2,11 +2,34 @@
 
 Sistema de gestión de tickets para institución financiera desarrollado con Spring Boot y PostgreSQL.
 
+## 🎯 Propósito del Sistema
+
+Sistema de gestión de tickets digitales para modernizar la atención presencial en sucursales bancarias mediante:
+
+- **🎫 Tickets digitales** sin papeles físicos
+- **📱 Notificaciones en tiempo real** vía Telegram  
+- **⏰ Tiempos de espera estimados** precisos
+- **📊 Dashboard ejecutivo** para supervisión en tiempo real
+
+### Beneficios Esperados
+- **NPS:** 45 → 65 puntos (+44% mejora)
+- **Abandonos:** 15% → 5% (-67% reducción)  
+- **Productividad:** +20% tickets procesados por ejecutivo
+- **Volumen:** Diseñado para 25,000+ tickets/día en fase nacional
+
+### Stack Tecnológico
+- **Backend:** Java 17 + Spring Boot 3.2
+- **Base de Datos:** PostgreSQL 15 con Flyway
+- **Integración:** Telegram Bot API
+- **Containerización:** Docker + Docker Compose
+
 ## 📚 Índice
 - [🚀 Inicio Rápido (5 minutos)](#-inicio-rápido-5-minutos)
 - [🛠️ Requisitos del Ambiente](#️-requisitos-del-ambiente)
+- [🛠️ Comandos de Desarrollo](#️-comandos-de-desarrollo)
 - [⚙️ Variables de Entorno](#️-variables-de-entorno)
 - [🚀 Despliegue con Docker Compose](#-despliegue-con-docker-compose)
+- [🧪 Testing y Validación](#-testing-y-validación)
 - [📊 Estado del Proyecto](#-estado-del-proyecto)
 
 ---
@@ -122,6 +145,44 @@ mvn clean compile      # Debe compilar sin errores
 **Docker:**
 - En Windows/Mac: Iniciar Docker Desktop
 - En Linux: `sudo systemctl start docker`
+
+## 🛠️ Comandos de Desarrollo
+
+### Build y Compilación
+```bash
+# Build completo
+mvn clean package
+
+# Solo compilación
+mvn clean compile
+
+# Generar JAR ejecutable
+mvn clean package -DskipTests
+```
+
+### Testing y Análisis
+```bash
+# Ejecutar tests unitarios
+mvn test
+
+# Análisis de código y verificación
+mvn verify
+
+# Generar documentación JavaDoc
+mvn javadoc:javadoc
+```
+
+### Desarrollo Local
+```bash
+# Ejecutar aplicación en modo desarrollo
+mvn spring-boot:run
+
+# Con perfil específico
+mvn spring-boot:run -Dspring-boot.run.profiles=dev
+
+# Con debugging habilitado
+mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005"
+```
 
 ## 📁 Estructura del Proyecto
 
@@ -363,42 +424,32 @@ docker-compose restart postgres
 
 ### ✅ Validación del Despliegue
 
-| Endpoint | Estado | Resultado Esperado |
-|----------|--------|--------------------|  
-| `http://localhost:8080/actuator/health` | ✅ VALIDADO | `{"status":"UP"}` |
-| `http://localhost:8080/api/dashboard/summary` | ✅ VALIDADO | JSON con métricas del sistema |
-| `http://localhost:8080/api/queues/stats` | ✅ VALIDADO | `{"avgWaitTime":15,"totalQueues":4,"activeTickets":0}` |
+**📋 Validación completa:** Ver [Validación del Sistema](docs/deployment/docker-setup-guide.md#-validación-del-sistema) en guía de Docker
 
-**Servicios Funcionando:**
+**Validación rápida:**
+
+| Endpoint | Resultado Esperado |
+|----------|--------------------|
+| `http://localhost:8080/actuator/health` | `{"status":"UP"}` |
+| `http://localhost:8080/api/dashboard/summary` | JSON con métricas del sistema |
+
+**Servicios funcionando:**
 - ✅ PostgreSQL 15: Saludable y respondiendo
 - ✅ Ticketero API: Iniciada correctamente
 - ✅ Base de Datos: 5 tablas creadas por Flyway
 - ✅ Health Checks: Todos los endpoints UP
-- ✅ Schedulers: Funcionando según especificación (5s/60s)
 
 ### Troubleshooting
 
-**PostgreSQL no inicia:**
-```bash
-# Verificar logs
-docker-compose logs postgres
+**📋 Guía completa:** Ver [Troubleshooting](docs/deployment/docker-setup-guide.md#️-troubleshooting) en guía de Docker
 
-# Limpiar y reiniciar
-docker-compose down -v
-docker-compose up -d postgres
-```
+**Problemas más comunes:**
 
-**Puerto 5432 ocupado:**
-```bash
-# Cambiar puerto en docker-compose.yml
-ports:
-  - "5433:5432"  # Usar puerto 5433
-```
-
-**Tablas no creadas:**
-- El sistema usa Flyway para crear tablas automáticamente
-- Si hay problemas, verificar logs: `docker-compose logs ticketero-app`
-- Las migraciones están en: `src/main/resources/db/migration/`
+| Error | Solución Rápida |
+|-------|----------------|
+| PostgreSQL no inicia | `docker-compose up -d postgres` |
+| Puerto 5432 ocupado | Cambiar puerto en docker-compose.yml |
+| Tablas no creadas | Verificar logs: `docker-compose logs ticketero-app` |
 
 ### Configuraciones Disponibles
 
@@ -414,18 +465,58 @@ ports:
 - Para testing silencioso, usar perfil `quiet` con intervalos más largos
 - La aplicación crea las tablas automáticamente con Hibernate
 
-## 🚀 Estado del Proyecto
+## 🧪 Testing y Validación
 
-**Fase Actual:** IMPLEMENT (v0.4.x)  
-**Progreso:** 3/7 etapas completadas
+### Ejecutar Tests Automáticos
+```bash
+# Tests unitarios
+mvn test
+
+# Tests funcionales completos
+cd docs/verify/02-functional-tests
+./run-all-tests.bat
+
+# Tests de performance básicos
+cd docs/verify/03-performance-tests
+./run-basic-performance-tests.bat
+
+# Smoke tests (validación rápida)
+cd docs/verify/00-smoke-tests
+./quick-start.bat
+```
+
+### Validación del Sistema
+- **📋 Guía completa de testing:** [`docs/verify/README.md`](docs/verify/README.md)
+- **🔍 Criterios de testing:** [`docs/verify/01-unit-tests/UNIT-TESTS-CRITERIA.md`](docs/verify/01-unit-tests/UNIT-TESTS-CRITERIA.md)
+- **📊 Reportes de ejecución:** [`docs/verify/02-functional-tests/test-execution-report.md`](docs/verify/02-functional-tests/test-execution-report.md)
+
+### Flujo de Validación Recomendado
+1. **Smoke tests** (2 min) - Validación básica
+2. **Unit tests** (5 min) - Lógica de negocio  
+3. **Functional tests** (15 min) - Escenarios completos
+4. **Performance tests** (10 min) - Rendimiento básico
+
+## 📊 Estado del Proyecto
+
+**Fase Actual:** COMPLETADO (v1.0)  
+**Progreso:** 7/7 etapas completadas
 
 - ✅ Tasks - Definición de tareas y épicas
 - ✅ Brainstorm - Análisis y diseño inicial  
 - ✅ Plan - Planificación y roadmap
-- 🔄 Implement - Desarrollo de componentes
-- ⏳ Verify - Pruebas y validación
-- ⏳ Deploy - Configuración y despliegue
-- ⏳ Document - Documentación final
+- ✅ Implement - Desarrollo de componentes
+- ✅ Verify - Pruebas y validación
+- ✅ Deploy - Configuración y despliegue
+- ✅ Document - Documentación final
+
+### Estado de Funcionalidades
+- ✅ **API REST:** 13 endpoints implementados y documentados
+- ✅ **Base de Datos:** PostgreSQL con 5 tablas y migraciones Flyway
+- ✅ **Integración Telegram:** Bot funcional con 3 tipos de mensajes
+- ✅ **Schedulers:** Procesamiento automático cada 5s/60s
+- ✅ **Docker:** Despliegue completo validado
+- ✅ **Testing:** Framework completo con 4 tipos de pruebas
+- ✅ **Documentación:** Completa y profesional
 
 ## 📋 Consideraciones del Proyecto
 
@@ -447,14 +538,20 @@ Este proyecto utiliza `com.example.ticketero` como package base por ser un **pro
 ### Para Desarrolladores
 1. **Configurar ambiente** → Seguir sección "Requisitos del Ambiente"
 2. **Inicio rápido** → Seguir sección "Inicio Rápido"
-3. **Revisar requerimientos** → `/docs/requirements/`
-4. **Entender arquitectura** → `/docs/architecture/`
-5. **Seguir plan de implementación** → `/docs/implementation/`
-6. **Usar prompts de desarrollo** → `/docs/prompts/`
+3. **Revisar requerimientos** → [`/docs/requirements/`](docs/requirements/)
+4. **Entender arquitectura** → [`/docs/architecture/`](docs/architecture/)
+5. **Seguir plan de implementación** → [`/docs/implementation/`](docs/implementation/)
+6. **Usar prompts de desarrollo** → [`/docs/prompts/`](docs/prompts/)
 
 ### Para DevOps
-- **Docker setup** → `/docs/deployment/docker-setup-guide.md`
+- **Docker setup** → [`/docs/deployment/docker-setup-guide.md`](docs/deployment/docker-setup-guide.md)
 - **Variables de entorno** → Archivo `.env.example`
 - **Configuración** → `src/main/resources/application.yml`
+
+### Documentación Completa
+- **📚 Índice General** → [`/docs/README.md`](docs/README.md)
+- **📖 API REST** → [`/docs/api_documentation_v1.0.md`](docs/api_documentation_v1.0.md)
+- **🗄️ Base de Datos** → [`/docs/database_documentation_v1.0.md`](docs/database_documentation_v1.0.md)
+- **👤 Manual de Usuario** → [`/docs/manual_usuario_v1.0.md`](docs/manual_usuario_v1.0.md)
 
 Cada carpeta contiene su propio README con instrucciones específicas.

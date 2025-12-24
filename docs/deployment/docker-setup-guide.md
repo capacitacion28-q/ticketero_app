@@ -21,32 +21,25 @@
 
 ## 🔧 CONFIGURACIÓN PREVIA
 
+**📋 Requisitos del sistema:** Ver [Requisitos del Ambiente](../../README.md#️-requisitos-del-ambiente) en README.md principal
+
+**Herramientas necesarias:**
+- Docker Desktop (cualquier versión reciente)
+- Git (para clonar el proyecto)
+- Editor de texto (para configurar .env)
+
 ### Variables de Entorno Requeridas
 
-Crear archivo `.env` en la raíz del proyecto:
+**📋 Configuración completa:** Ver [Variables de Entorno](../../README.md#️-variables-de-entorno) en README.md principal
 
+**Variables mínimas para Docker:**
 ```bash
-# Variables de Base de Datos
-DATABASE_NAME=ticketero_db
-DATABASE_USER=ticketero_user
-DATABASE_PASSWORD=ticketero_pass
-DATABASE_HOST=localhost
-DATABASE_PORT=5432
+# Crear archivo .env
+cp .env.example .env
 
-# Variables de Telegram Bot API
-TELEGRAM_BOT_TOKEN=123456789:ABC-DEF1234ghIkl-zyx57W2v1u123ew11
-
-# Variables de Schedulers
-SCHEDULER_MESSAGE_RATE=60000  # 60 segundos
-SCHEDULER_QUEUE_RATE=5000     # 5 segundos
-
-# Variables de Servidor
-SERVER_PORT=8080
-
-# Variables de Auditoría
-AUDIT_RETENTION_DAYS=2555     # 7 años
-NO_SHOW_TIMEOUT=5             # 5 minutos
-MAX_CONCURRENT_TICKETS=3      # Por asesor
+# Editar variables obligatorias:
+DATABASE_PASSWORD=tu_password_seguro
+TELEGRAM_BOT_TOKEN=tu_bot_token_aqui
 ```
 
 ### Estructura de Archivos Necesaria
