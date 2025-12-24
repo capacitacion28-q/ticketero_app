@@ -1,0 +1,47 @@
+# Configuración para tests contra aplicación en Docker Compose
+# Fecha: 2025-12-24
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ticketero_db
+    username: ticketero_user
+    password: ticketero_pass
+    driver-class-name: org.postgresql.Driver
+  
+  jpa:
+    hibernate:
+      ddl-auto: validate  # No modificar esquema, usar Flyway
+    show-sql: false
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    
+  flyway:
+    enabled: false  # Ya ejecutado en Docker Compose
+
+# Configuración para tests E2E
+scheduler:
+  message:
+    fixed-rate: 2000   # 2s para tests rápidos
+  queue:
+    fixed-rate: 1000   # 1s para tests rápidos
+
+telegram:
+  bot:
+    token: test-token
+    api-url: http://localhost:8089/bot  # WireMock externo
+    timeout: 5000
+  enabled: false  # Deshabilitado para tests
+
+logging:
+  level:
+    com.example.ticketero: DEBUG
+    org.springframework.retry: DEBUG
+
+# Configuración específica para Docker Compose
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
