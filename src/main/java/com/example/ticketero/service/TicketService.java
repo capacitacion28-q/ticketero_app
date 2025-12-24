@@ -16,8 +16,22 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Service principal para Ticket - RF-001, RF-002
- * Implementa RN-001, RN-002, RN-003 según especificaciones del plan
+ * Service mejorado para TicketService - RF-001, RF-002
+ * 
+ * Implementa: RF-001 (Creación de tickets), RF-006 (Consulta de tickets)
+ * Reglas de Negocio: RN-001 (Unicidad ticket activo), RN-002 (Cálculo posición), RN-003 (Tiempo estimado)
+ * 
+ * Funcionalidades principales:
+ * - Creación de tickets con validación de unicidad por nationalId
+ * - Generación automática de números secuenciales por cola (RN-005, RN-006)
+ * - Integración con sistema de notificaciones Telegram
+ * - Auditoría automática de eventos críticos
+ * 
+ * Dependencias: TicketRepository, QueueManagementService, TelegramService
+ * 
+ * @author Sistema Ticketero
+ * @version 1.0
+ * @since 1.0
  */
 @Service
 @RequiredArgsConstructor
@@ -94,6 +108,13 @@ public class TicketService {
         return TicketResponse.from(updatedTicket);
     }
     
+    /**
+     * RN-001: Valida que no existe ticket activo para el mismo nationalId.
+     * Lanza TicketActivoExistenteException si encuentra ticket en estados WAITING, CALLED o IN_SERVICE.
+     * 
+     * @param nationalId RUT del cliente a validar
+     * @throws TicketActivoExistenteException si ya existe ticket activo
+     */
     private void validateNoActiveTicket(String nationalId) {
         List<TicketStatus> activeStatuses = List.of(TicketStatus.WAITING, TicketStatus.CALLED, TicketStatus.IN_SERVICE);
         
@@ -103,6 +124,13 @@ public class TicketService {
         }
     }
     
+    /**
+     * RN-005, RN-006: Genera número de ticket con prefijo según tipo de cola.
+     * Formato: [Prefijo][Secuencia] (ej: C01, P02, E03, G04)
+     * 
+     * @param queueType Tipo de cola para determinar prefijo
+     * @return Número de ticket generado
+     */
     // RN-005, RN-006: Generación de números con prefijos según plan
     private String generateTicketNumber(com.example.ticketero.model.enums.QueueType queueType) {
         String prefix = queueType.getPrefix();

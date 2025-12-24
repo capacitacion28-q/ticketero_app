@@ -10,6 +10,28 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
+/**
+ * Controller REST para administración de colas y dashboard ejecutivo.
+ * 
+ * Implementa: RF-005 (Gestión de múltiples colas), RF-007 (Dashboard ejecutivo)
+ * 
+ * Endpoints de Colas (RF-005):
+ * - GET /api/queues/{queueType}: Estado de cola específica
+ * - GET /api/queues/stats: Estadísticas generales de colas
+ * - GET /api/queues/summary: Resumen de todas las colas
+ * 
+ * Endpoints de Dashboard (RF-007):
+ * - GET /api/dashboard/summary: Resumen ejecutivo principal
+ * - GET /api/dashboard/realtime: Métricas en tiempo real
+ * - GET /api/dashboard/alerts: Alertas activas del sistema
+ * - GET /api/dashboard/metrics: Métricas detalladas
+ * 
+ * Tipos de cola soportados: CAJA, PERSONAL_BANKER, EMPRESAS, GERENCIA
+ * 
+ * @author Sistema Ticketero
+ * @version 1.0
+ * @since 1.0
+ */
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
@@ -18,6 +40,12 @@ public class AdminController {
 
     private final QueueManagementService queueManagementService;
 
+    /**
+     * RF-005: Consulta estado de cola específica con información detallada.
+     * 
+     * @param queueType Tipo de cola (CAJA, PERSONAL_BANKER, EMPRESAS, GERENCIA)
+     * @return ResponseEntity con datos de la cola (nombre, tiempo promedio, prioridad)
+     */
     // RF-005: Gestión de colas (3 endpoints)
     @GetMapping("/queues/{queueType}")
     public ResponseEntity<Map<String, Object>> consultarCola(@PathVariable QueueType queueType) {
@@ -31,6 +59,11 @@ public class AdminController {
         ));
     }
     
+    /**
+     * RF-005: Obtiene estadísticas generales de todas las colas.
+     * 
+     * @return ResponseEntity con métricas agregadas (total colas, tickets activos, tiempo promedio)
+     */
     @GetMapping("/queues/stats")
     public ResponseEntity<Map<String, Object>> estadisticasColas() {
         log.info("GET /api/queues/stats");
@@ -41,6 +74,11 @@ public class AdminController {
         ));
     }
     
+    /**
+     * RF-005: Resumen consolidado de estado de todas las colas.
+     * 
+     * @return ResponseEntity con estado de cada tipo de cola
+     */
     @GetMapping("/queues/summary")
     public ResponseEntity<Map<String, Object>> resumenColas() {
         log.info("GET /api/queues/summary");
@@ -52,6 +90,11 @@ public class AdminController {
         ));
     }
     
+    /**
+     * RF-007: Dashboard principal con resumen ejecutivo del sistema.
+     * 
+     * @return ResponseEntity con métricas clave (tickets activos, ejecutivos disponibles, estado general)
+     */
     // RF-007: Dashboard (4 endpoints)
     @GetMapping("/dashboard/summary")
     public ResponseEntity<Map<String, Object>> dashboardResumen() {
@@ -65,6 +108,11 @@ public class AdminController {
         ));
     }
     
+    /**
+     * RF-007: Métricas del dashboard en tiempo real con timestamp.
+     * 
+     * @return ResponseEntity con datos actualizados y intervalo de refresco
+     */
     @GetMapping("/dashboard/realtime")
     public ResponseEntity<Map<String, Object>> dashboardTiempoReal() {
         log.info("GET /api/dashboard/realtime");
@@ -75,12 +123,22 @@ public class AdminController {
         ));
     }
     
+    /**
+     * RF-007: Alertas activas del sistema (saturación, falta de asesores, etc.).
+     * 
+     * @return ResponseEntity con lista de alertas con prioridad y recomendaciones
+     */
     @GetMapping("/dashboard/alerts")
     public ResponseEntity<Map<String, Object>> alertasActivas() {
         log.info("GET /api/dashboard/alerts");
         return ResponseEntity.ok(Map.of("alerts", "[]"));
     }
     
+    /**
+     * RF-007: Métricas detalladas del sistema para análisis avanzado.
+     * 
+     * @return ResponseEntity con métricas por cola y estadísticas de rendimiento
+     */
     @GetMapping("/dashboard/metrics")
     public ResponseEntity<Map<String, Object>> metricas() {
         log.info("GET /api/dashboard/metrics");

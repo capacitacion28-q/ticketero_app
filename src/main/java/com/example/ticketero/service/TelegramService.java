@@ -16,8 +16,24 @@ import java.time.LocalDateTime;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * TelegramService según especificación del plan - Sección 8.3
- * Integración real con Telegram Bot API
+ * Service de integración con Telegram Bot API para notificaciones en tiempo real.
+ * 
+ * Implementa: RF-002 (Programación de mensajes Telegram)
+ * Reglas de Negocio: RN-007 (Máximo 3 reintentos), RN-008 (Backoff exponencial)
+ * 
+ * Características:
+ * - Integración real con Telegram Bot API vía RestTemplate
+ * - Sistema de reintentos con backoff exponencial (30s, 60s, 120s)
+ * - Plantillas predefinidas en español para diferentes eventos
+ * - Procesamiento asíncrono vía MensajeScheduler cada 60s
+ * 
+ * Plantillas disponibles: TOTEM_TICKET_CREADO, TOTEM_PROXIMO_TURNO, TOTEM_ES_TU_TURNO
+ * 
+ * Dependencias: MensajeRepository, RestTemplate (configurado)
+ * 
+ * @author Sistema Ticketero
+ * @version 1.0
+ * @since 1.0
  */
 @Service
 @RequiredArgsConstructor
@@ -38,6 +54,13 @@ public class TelegramService {
         return new RestTemplate();
     }
     
+    /**
+     * RF-002: Programa mensaje para envío asíncrono vía scheduler.
+     * Crea registro en cola de mensajes con estado PENDIENTE.
+     * 
+     * @param ticket Ticket asociado al mensaje
+     * @param template Plantilla de mensaje a utilizar
+     */
     @Transactional
     public void programarMensaje(Ticket ticket, MessageTemplate template) {
         Mensaje mensaje = Mensaje.builder()
@@ -53,6 +76,12 @@ public class TelegramService {
         log.info("Mensaje programado: {} para ticket: {}", template, ticket.getNumero());
     }
     
+    /**
+     * RN-007, RN-008: Envía mensaje vía Telegram Bot API con manejo de reintentos.
+     * Implementa backoff exponencial y límite de 3 intentos.
+     * 
+     * @param mensaje Mensaje a enviar con datos completos
+     */
     @Transactional
     public void enviarMensaje(Mensaje mensaje) {
         log.info("Enviando mensaje a {}", mensaje.getTelefono());
@@ -89,6 +118,13 @@ public class TelegramService {
         }
     }
     
+    /**
+     * Genera contenido personalizado del mensaje según plantilla y datos del ticket.
+     * Utiliza formato Markdown para mejor presentación en Telegram.
+     * 
+     * @param mensaje Mensaje con plantilla y ticket asociado
+     * @return Contenido formateado del mensaje
+     */
     private String generarContenidoMensaje(Mensaje mensaje) {
         Ticket ticket = mensaje.getTicket();
         

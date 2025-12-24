@@ -1,221 +1,199 @@
-# Sistema Ticketero Digital - Development Guidelines
+# Sistema Ticketero - Development Guidelines
 
 ## Code Quality Standards
 
-### Package Structure Convention
-- **Base Package**: `com.example.ticketero` (prototype - change to `com.{company}.ticketero` for production)
-- **Layer Separation**: Clear separation between controller, service, repository, model layers
-- **Consistent Naming**: Package names follow domain-driven design principles
+### Class-Level Documentation
+- **Comprehensive JavaDoc**: Every service class includes detailed purpose, functionality, and architectural references
+- **Business Context**: Classes reference specific requirements (RF-004, ADR-001) and business rules (RN-007, RN-008)
+- **Architecture Links**: Documentation references design documents and implementation plans
+- **Version Information**: Classes include author and version metadata
 
-### Class and Method Naming
-- **Service Classes**: End with `Service` suffix (e.g., `DashboardService`, `AuditService`)
-- **Repository Classes**: End with `Repository` suffix following Spring Data JPA conventions
-- **Controller Classes**: End with `Controller` suffix for REST endpoints
-- **DTO Classes**: Descriptive names with `Request`/`Response` suffixes
-- **Method Names**: Descriptive, action-oriented names (e.g., `generateResumenEjecutivo`, `logTicketCreated`)
+### Method Documentation Patterns
+- **Business Logic Methods**: Include purpose, parameters, and business rule references
+- **Public API Methods**: Comprehensive documentation with examples and constraints
+- **Private Helper Methods**: Concise but clear purpose statements
+- **Audit Methods**: Detailed logging context and compliance references
 
-### Documentation Standards
-- **Class-level JavaDoc**: Include purpose and functional requirement reference (e.g., `RF-004`, `RF-008`)
-- **Method Documentation**: Brief descriptions for complex business logic methods
-- **Inline Comments**: Spanish comments for business domain explanations
-- **Code Self-Documentation**: Prefer readable code over excessive comments
+### Naming Conventions
+- **Service Classes**: Descriptive names ending in "Service" (DashboardService, AuditService)
+- **Method Names**: Spanish business terms for domain methods (registrarEvento, determinarActorType)
+- **Variable Names**: Clear, descriptive names matching business context
+- **Constants**: Uppercase with underscores for configuration values
 
 ## Structural Conventions
 
-### Service Layer Patterns
-- **Constructor Injection**: Use `@RequiredArgsConstructor` with `final` fields
-- **Transaction Management**: `@Transactional(readOnly = true)` at class level, `@Transactional` for write operations
-- **Logging**: `@Slf4j` annotation with structured logging using `log.debug()` for operations
-- **Builder Pattern**: Use Lombok `@Builder` for complex entity creation
+### Service Layer Architecture
+- **@Service Annotation**: All business logic classes marked as Spring services
+- **@RequiredArgsConstructor**: Lombok for constructor-based dependency injection
+- **@Slf4j**: Standardized logging using SLF4J with Lombok
+- **@Transactional**: Explicit transaction boundaries with readOnly for queries
 
-### Repository Layer Standards
-- **JPA Repositories**: Extend `JpaRepository<Entity, ID>` for standard CRUD operations
-- **Query Methods**: Use Spring Data JPA derived query methods (e.g., `countByStatusAndQueueType`)
-- **Custom Queries**: Define complex queries using `@Query` annotation when needed
-- **Method Naming**: Follow Spring Data JPA conventions for automatic query generation
-
-### Controller Layer Conventions
-- **REST Endpoints**: Clear, RESTful URL patterns
-- **Response DTOs**: Always return structured DTOs, never entities directly
-- **Exception Handling**: Centralized exception handling with `@GlobalExceptionHandler`
-- **Validation**: Use Bean Validation annotations at DTO level
-
-### Model Layer Patterns
-- **Records for DTOs**: Use Java records for immutable data transfer objects
-- **Validation Annotations**: Comprehensive Bean Validation with custom messages in Spanish
-- **Enum Usage**: Strong typing with enums for status, types, and categories
-- **Factory Methods**: Static factory methods for DTO creation from entities (e.g., `from(Entity)`)
-
-## Semantic Patterns
-
-### Error Handling Strategy
-- **Global Exception Handler**: Centralized error handling with `@ControllerAdvice`
-- **Custom Exceptions**: Domain-specific exceptions (e.g., `TicketNotFoundException`)
-- **Structured Error Responses**: Consistent `ErrorResponse` DTO with status codes and messages
-- **Validation Error Mapping**: Bean Validation violations mapped to user-friendly messages
-
-### Audit Trail Implementation
-- **Comprehensive Logging**: All business operations logged through `AuditService`
-- **Event Types**: Standardized event types (e.g., `TICKET_CREATED`, `STATUS_CHANGED`)
-- **Actor Tracking**: Track actor type (CLIENT, ADVISOR, SYSTEM, SUPERVISOR)
-- **IP Address Logging**: Include client IP for security and compliance
-
-### Data Validation Patterns
-- **Bean Validation**: Use Jakarta Validation annotations extensively
-- **Custom Validators**: Pattern-based validation for business rules (RUT format, phone numbers)
-- **Multilingual Messages**: Validation messages in Spanish for user-facing errors
-- **Positive ID Validation**: Ensure all ID fields are positive numbers
-
-### Business Logic Patterns
-- **Status Management**: Enum-based status tracking with clear state transitions
-- **Queue Processing**: Automated background processing with Spring `@Scheduled`
-- **Load Balancing**: Least-loaded advisor assignment algorithm
-- **Metrics Calculation**: Real-time dashboard metrics with statistical analysis
-
-## Internal API Usage Patterns
-
-### Spring Boot Annotations
+### Dependency Injection Patterns
 ```java
 @Service
 @RequiredArgsConstructor
 @Slf4j
 @Transactional(readOnly = true)
-public class ExampleService {
-    
-    private final ExampleRepository repository;
-    
-    @Transactional
-    public void writeOperation() {
-        // Write operations
-    }
+public class ServiceClass {
+    private final Repository repository;
+    private final OtherService otherService;
 }
 ```
 
-### Repository Query Patterns
-```java
-// Derived query methods
-List<Entity> findByStatusOrderByAssignedTicketsCountAsc(Status status);
-long countByStatusAndQueueType(TicketStatus status, QueueType queueType);
+### Transaction Management
+- **Read-Only Transactions**: Default @Transactional(readOnly = true) on class level
+- **Write Operations**: Explicit @Transactional on methods that modify data
+- **Audit Operations**: Always transactional for data consistency
 
-// Custom queries for complex operations
-@Query("SELECT e FROM Entity e WHERE e.condition = :param")
-List<Entity> customQuery(@Param("param") String param);
+### Error Handling & Logging
+- **Debug Logging**: Extensive use of log.debug() for operation tracking
+- **Business Context**: Log messages include business identifiers (ticket numbers, actor names)
+- **Audit Trail**: Comprehensive logging for compliance and debugging
+
+## Semantic Patterns
+
+### Builder Pattern Usage
+- **Entity Creation**: Consistent use of builder pattern for complex objects
+- **AuditEvent Creation**: Standardized builder usage with fluent API
+- **Configuration Objects**: Builder pattern for complex configuration setup
+
+### Stream API Patterns
+- **Data Transformation**: Extensive use of streams for collections processing
+- **Filtering Operations**: Stream filters for business rule application
+- **Aggregation**: Stream collectors for statistical calculations
+
+### Enum Integration
+- **Business States**: Enums for all business states (TicketStatus, AdvisorStatus, QueueType)
+- **Type Safety**: Enum parameters in method signatures for type safety
+- **Business Logic**: Enum methods for business calculations (getAvgTimeMinutes())
+
+### Factory Method Pattern
+- **DTO Creation**: Static factory methods (AuditEventResponse.from())
+- **Response Objects**: Consistent factory pattern for API responses
+- **Entity Conversion**: Standardized conversion between entities and DTOs
+
+## Internal API Usage & Patterns
+
+### Repository Integration
+```java
+// Standard repository usage pattern
+private final TicketRepository ticketRepository;
+private final AdvisorRepository advisorRepository;
+
+// Query method usage
+int count = (int) ticketRepository.countByStatusAndQueueType(status, queueType);
+List<Advisor> advisors = advisorRepository.findByStatusOrderByAssignedTicketsCountAsc(status);
 ```
 
-### DTO Validation Patterns
+### Service Orchestration
 ```java
-public record RequestDTO(
-    @NotBlank(message = "Campo obligatorio")
-    @Size(min = 5, max = 200, message = "Debe tener entre 5-200 caracteres")
-    String field,
-    
-    @NotNull(message = "ID es obligatorio")
-    @Positive(message = "ID debe ser positivo")
-    Long id,
-    
-    @Pattern(regexp = "^\\+56[0-9]{9}$", message = "Formato inválido")
-    String phone
-) {}
-```
+// Service composition pattern
+private final QueueService queueService;
+private final AuditService auditService;
 
-### Audit Logging Pattern
-```java
-@Transactional
-public void logBusinessEvent(Entity entity, String actor, ActorType actorType, String clientIp) {
-    AuditEvent event = AuditEvent.builder()
-        .timestamp(LocalDateTime.now())
-        .eventType("BUSINESS_EVENT")
-        .actor(actor)
-        .actorType(actorType)
-        .additionalData(formatAdditionalData(entity))
-        .ipAddress(clientIp)
-        .build();
-    
-    auditEventRepository.save(event);
-    log.debug("Audit logged: {} for {}", eventType, entityId);
+// Method delegation with audit logging
+public void performBusinessOperation() {
+    // Business logic
+    auditService.logSystemAction(eventType, actor, actorType, description, clientIp);
 }
+```
+
+### Configuration Access
+```java
+// Environment-based configuration
+@Value("${scheduler.queue.fixed-rate:5000}")
+private long queueProcessingRate;
+
+// Business rule configuration
+private static final int NO_SHOW_TIMEOUT_MINUTES = 5;
 ```
 
 ## Frequently Used Code Idioms
 
-### Stream Processing for Collections
+### Null Safety Patterns
 ```java
-// Convert entities to DTOs
-return entities.stream()
-    .map(ResponseDTO::from)
-    .collect(Collectors.toList());
+// Optional usage for safe operations
+return advisorRepository.findFirstByOrderByAssignedTicketsCountDesc()
+    .map(advisor -> new DashboardResponse.EjecutivoProductivo(
+        advisor.getName(),
+        advisor.getAssignedTicketsCount()
+    ))
+    .orElse(new DashboardResponse.EjecutivoProductivo("N/A", 0));
+```
 
-// Statistical calculations
-double average = values.stream()
-    .mapToInt(Type::getValue)
+### Collection Processing
+```java
+// Stream aggregation patterns
+double average = Arrays.stream(QueueType.values())
+    .mapToInt(QueueType::getAvgTimeMinutes)
     .average()
-    .orElse(0.0);
+    .orElse(10.0);
+
+// Filtering and counting
+long criticalAlerts = alertas.stream()
+    .filter(a -> "CRITICAL".equals(a.prioridad()))
+    .count();
 ```
 
-### Conditional Logic for Business Rules
+### Time Handling
 ```java
-// Status determination based on thresholds
-private String determineStatus(int count) {
-    if (count == 0) return "EMPTY";
-    if (count <= 3) return "NORMAL";
-    if (count <= 7) return "MODERATE";
-    return "SATURATED";
-}
-```
+// LocalDateTime usage patterns
+LocalDateTime now = LocalDateTime.now();
+LocalDateTime startOfDay = now.withHour(0).withMinute(0).withSecond(0);
 
-### Builder Pattern for Complex Objects
-```java
-Entity entity = Entity.builder()
-    .field1(value1)
-    .field2(value2)
-    .timestamp(LocalDateTime.now())
-    .build();
+// Duration calculations
+long horasTranscurridas = Math.max(1, Duration.between(startOfDay, now).toHours());
 ```
 
 ## Popular Annotations
 
-### Class-Level Annotations
-- `@Service` - Service layer components
-- `@Repository` - Data access layer (auto-applied by Spring Data JPA)
-- `@Controller` / `@RestController` - Web layer components
-- `@Component` - Generic Spring components
-- `@RequiredArgsConstructor` - Lombok constructor injection
-- `@Slf4j` - Lombok logging
-- `@Transactional` - Transaction management
+### Spring Framework Annotations
+- **@Service**: Business logic components (100% usage in service classes)
+- **@Transactional**: Transaction management (readOnly = true default)
+- **@Autowired**: Dependency injection in test classes
+- **@Component**: Utility and test components
 
-### Method-Level Annotations
-- `@Transactional` - Write operations
-- `@Query` - Custom JPA queries
-- `@Scheduled` - Background processing
-- `@Override` - Method overriding
+### Lombok Annotations
+- **@RequiredArgsConstructor**: Constructor generation (100% usage in services)
+- **@Slf4j**: Logging integration (100% usage in services)
+- **@Builder**: Complex object creation (entities and DTOs)
 
 ### Validation Annotations
-- `@NotNull` / `@NotBlank` - Null/empty validation
-- `@Size(min, max)` - String/collection size validation
-- `@Pattern(regexp)` - Regular expression validation
-- `@Positive` - Positive number validation
+- **@NotNull**: Required field validation
+- **@NotBlank**: String validation with content requirements
+- **@Size**: Length constraints for strings and collections
+- **@Pattern**: Regex validation for formatted fields (RUT, phone numbers)
 
-### Testing Annotations
-- `@Component` - Test components
-- `@Autowired` - Dependency injection in tests
-- `CommandLineRunner` - Test execution interface
+### JPA Annotations
+- **@Entity**: Database entity mapping
+- **@Table**: Table name specification
+- **@Column**: Column mapping and constraints
+- **@Enumerated**: Enum persistence strategy
 
-## Development Best Practices
+## Testing Patterns
 
-### Performance Considerations
-- Use `@Transactional(readOnly = true)` for read-only operations
-- Implement efficient JPA queries with proper indexing
-- Use streaming for large collections processing
-- Cache frequently accessed data where appropriate
+### Test Structure
+- **Main Method Testing**: Simple validation tests using main() methods
+- **Component Testing**: Spring Boot test components with @Component
+- **Validation Testing**: Bean Validation framework integration
+- **Repository Testing**: CommandLineRunner implementation for database testing
 
-### Security Practices
-- Validate all input data with Bean Validation
-- Log security-relevant events through audit trail
-- Never expose internal entity structure in APIs
-- Use structured error responses without sensitive information
+### Assertion Patterns
+```java
+// Console-based validation
+System.out.println("✅ Validation successful");
+System.out.println("❌ ERROR: Violations found");
 
-### Maintainability Standards
-- Keep methods focused on single responsibilities
-- Use meaningful variable and method names
-- Implement comprehensive logging for debugging
-- Follow consistent code formatting and structure
+// Conditional validation
+if (violations.isEmpty()) {
+    System.out.println("✅ No violations found");
+} else {
+    violations.forEach(v -> System.out.println("❌ " + v.getMessage()));
+}
+```
+
+### Test Data Creation
+- **Valid Test Cases**: Complete objects with all required fields
+- **Invalid Test Cases**: Systematic violation of validation rules
+- **Factory Method Testing**: Verification of DTO creation patterns
+- **Nested Record Testing**: Complex object structure validation

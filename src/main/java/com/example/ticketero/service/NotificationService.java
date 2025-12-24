@@ -15,8 +15,26 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 
 /**
- * Service para notificaciones - RF-005
- * Integración con Telegram Bot API para envío de mensajes
+ * Service para notificaciones multicanal con integración Telegram.
+ * 
+ * Implementa: RF-002 (Programación de mensajes Telegram)
+ * 
+ * Funcionalidades:
+ * - Notificaciones automáticas por cambio de estado
+ * - Programación de mensajes de proximidad
+ * - Integración con cola de mensajes asíncrona
+ * - Plantillas personalizadas por tipo de evento
+ * 
+ * Eventos notificados:
+ * - Creación de ticket (TOTEM_TICKET_CREADO)
+ * - Cambio a CALLED (TOTEM_ES_TU_TURNO)
+ * - Proximidad de turno (TOTEM_PROXIMO_TURNO)
+ * 
+ * Dependencias: MensajeRepository
+ * 
+ * @author Sistema Ticketero
+ * @version 1.0
+ * @since 1.0
  */
 @Service
 @RequiredArgsConstructor
@@ -29,6 +47,11 @@ public class NotificationService {
     @Value("${telegram.bot.enabled:false}")
     private boolean telegramEnabled;
     
+    /**
+     * RF-002: Envía notificación de ticket creado con datos de posición y tiempo estimado.
+     * 
+     * @param ticket Ticket recién creado
+     */
     @Transactional
     public void sendTicketCreatedNotification(Ticket ticket) {
         log.info("Sending ticket created notification for: {}", ticket.getNumero());
@@ -50,6 +73,13 @@ public class NotificationService {
         }
     }
     
+    /**
+     * Envía notificación por cambio de estado si corresponde.
+     * Solo notifica para cambios relevantes (CALLED).
+     * 
+     * @param ticket Ticket con nuevo estado
+     * @param oldStatus Estado anterior del ticket
+     */
     @Transactional
     public void sendStatusChangeNotification(Ticket ticket, TicketStatus oldStatus) {
         log.info("Sending status change notification for ticket: {} ({} -> {})", 
@@ -76,6 +106,11 @@ public class NotificationService {
         }
     }
     
+    /**
+     * RN-012: Programa notificación de proximidad para tickets en posiciones cercanas.
+     * 
+     * @param ticket Ticket que se acerca a su turno
+     */
     @Transactional
     public void sendProximityNotification(Ticket ticket) {
         log.info("Sending proximity notification for ticket: {}", ticket.getNumero());

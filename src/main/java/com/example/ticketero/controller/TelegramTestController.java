@@ -10,7 +10,25 @@ import org.springframework.web.client.RestTemplate;
 import java.util.Map;
 
 /**
- * Controller de prueba para integración con Telegram
+ * Controller de prueba para integración con Telegram Bot API.
+ * 
+ * Funcionalidades de testing:
+ * - Verificación de conectividad con Telegram Bot API
+ * - Envío de mensajes de prueba
+ * - Obtención de updates y información del bot
+ * 
+ * Endpoints disponibles:
+ * - GET /api/test/telegram/updates: Obtener updates del bot
+ * - POST /api/test/telegram/send: Enviar mensaje de prueba
+ * - GET /api/test/telegram/bot-info: Información del bot
+ * 
+ * Configuración requerida:
+ * - telegram.bot-token: Token del bot de Telegram
+ * - telegram.api-url: URL base de la API de Telegram
+ * 
+ * @author Sistema Ticketero
+ * @version 1.0
+ * @since 1.0
  */
 @RestController
 @RequestMapping("/api/test")
@@ -26,6 +44,11 @@ public class TelegramTestController {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
+    /**
+     * Obtiene updates recientes del bot de Telegram para verificar conectividad.
+     * 
+     * @return ResponseEntity con updates del bot o error de conexión
+     */
     @GetMapping("/telegram/updates")
     public ResponseEntity<Object> getUpdates() {
         try {
@@ -38,6 +61,12 @@ public class TelegramTestController {
         }
     }
 
+    /**
+     * Envía mensaje de prueba a chat específico vía Telegram Bot API.
+     * 
+     * @param request Mapa con chatId y mensaje opcional
+     * @return ResponseEntity con respuesta de Telegram API o error
+     */
     @PostMapping("/telegram/send")
     public ResponseEntity<Object> sendTestMessage(@RequestBody Map<String, String> request) {
         try {
@@ -60,6 +89,11 @@ public class TelegramTestController {
         }
     }
 
+    /**
+     * Obtiene información del bot configurado para verificar token.
+     * 
+     * @return ResponseEntity con datos del bot o error de autenticación
+     */
     @GetMapping("/telegram/bot-info")
     public ResponseEntity<Object> getBotInfo() {
         try {

@@ -10,6 +10,23 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+/**
+ * Entidad que representa la cola de mensajes para notificaciones vía Telegram.
+ * 
+ * Implementa: RF-002 (Programación de mensajes Telegram)
+ * Reglas de Negocio: RN-007 (Máximo 3 reintentos), RN-008 (Backoff exponencial)
+ * 
+ * Funcionalidades:
+ * - Cola de mensajes con procesamiento asíncrono cada 60s
+ * - Sistema de reintentos con backoff exponencial (30s, 60s, 120s)
+ * - Plantillas predefinidas (TOTEM_TICKET_CREADO, TOTEM_ES_TU_TURNO, etc.)
+ * 
+ * Estados: PENDIENTE, ENVIADO, FALLIDO
+ * 
+ * @author Sistema Ticketero
+ * @version 1.0
+ * @since 1.0
+ */
 @Entity
 @Table(name = "mensaje")
 @Data
@@ -54,6 +71,10 @@ public class Mensaje {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime fechaCreacion;
     
+    /**
+     * Callback JPA ejecutado antes de persistir la entidad.
+     * Inicializa timestamps y fecha de programación por defecto.
+     */
     @PrePersist
     protected void onCreate() {
         fechaCreacion = LocalDateTime.now();
@@ -62,6 +83,10 @@ public class Mensaje {
         }
     }
     
+    /**
+     * RN-007: Incrementa contador de intentos de envío para control de reintentos.
+     * Máximo 3 reintentos antes de marcar como FALLIDO.
+     */
     public void incrementarIntentos() {
         this.intentos++;
     }

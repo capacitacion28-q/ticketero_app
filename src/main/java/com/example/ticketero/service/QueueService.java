@@ -13,8 +13,24 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Service para gestión de colas - RF-003
- * Implementa RN-002 (posicionamiento) y RN-003 (tiempos estimados)
+ * Service especializado para gestión y consulta de colas por tipo.
+ * 
+ * Implementa: RF-005 (Gestión de múltiples colas)
+ * Reglas de Negocio: RN-002 (Posicionamiento), RN-003 (Tiempos estimados)
+ * 
+ * Funcionalidades:
+ * - Cálculo de posiciones dinámicas por cola
+ * - Estimación de tiempos basada en tipo de cola
+ * - Estado detallado de colas con tickets en espera
+ * - Información de próximo ticket por cola
+ * 
+ * Tipos de cola soportados: CAJA, PERSONAL_BANKER, EMPRESAS, GERENCIA
+ * 
+ * Dependencias: TicketRepository
+ * 
+ * @author Sistema Ticketero
+ * @version 1.0
+ * @since 1.0
  */
 @Service
 @RequiredArgsConstructor
@@ -24,18 +40,38 @@ public class QueueService {
     
     private final TicketRepository ticketRepository;
     
+    /**
+     * RN-002: Calcula posición dinámica en cola basada en tickets en espera.
+     * 
+     * @param queueType Tipo de cola para cálculo
+     * @return Posición siguiente en la cola
+     */
     public int calculateQueuePosition(QueueType queueType) {
         // RN-002: Calcular posición basada en tickets en espera
         long waitingTickets = ticketRepository.countByStatusAndQueueType(TicketStatus.WAITING, queueType);
         return (int) waitingTickets + 1;
     }
     
+    /**
+     * RN-003: Calcula tiempo estimado de espera basado en posición y tipo de cola.
+     * 
+     * @param queueType Tipo de cola con tiempo promedio definido
+     * @param position Posición actual en la cola
+     * @return Tiempo estimado en minutos
+     */
     public int calculateEstimatedWaitTime(QueueType queueType, int position) {
         // RN-003: Tiempo estimado basado en tipo de cola y posición
         int avgTimePerTicket = queueType.getAvgTimeMinutes();
         return (position - 1) * avgTimePerTicket;
     }
     
+    /**
+     * RF-005: Obtiene estado completo de una cola específica.
+     * Incluye tickets en espera, notificados, en atención y próximo número.
+     * 
+     * @param queueType Tipo de cola a consultar
+     * @return QueueStatusResponse con estado detallado
+     */
     public QueueStatusResponse getQueueStatus(QueueType queueType) {
         log.debug("Getting queue status for: {}", queueType);
         

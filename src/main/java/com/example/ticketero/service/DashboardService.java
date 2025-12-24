@@ -16,8 +16,26 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Service para dashboard ejecutivo - RF-004
- * Métricas en tiempo real y alertas del sistema
+ * Service para dashboard ejecutivo con métricas en tiempo real y alertas inteligentes.
+ * 
+ * Implementa: RF-007 (Dashboard ejecutivo)
+ * 
+ * Funcionalidades principales:
+ * - Resumen ejecutivo con tickets activos y completados
+ * - Estado de colas con detección de saturación
+ * - Monitoreo de asesores con distribución de carga
+ * - Sistema de alertas automáticas (saturación, falta de asesores)
+ * - Métricas detalladas por tipo de cola
+ * 
+ * Alertas implementadas:
+ * - QUEUE_OVERFLOW: Cola con más de 10 tickets
+ * - NO_ADVISORS_AVAILABLE: Sin asesores disponibles
+ * 
+ * Dependencias: TicketRepository, AdvisorRepository, QueueService
+ * 
+ * @author Sistema Ticketero
+ * @version 1.0
+ * @since 1.0
  */
 @Service
 @RequiredArgsConstructor
@@ -29,6 +47,12 @@ public class DashboardService {
     private final AdvisorRepository advisorRepository;
     private final QueueService queueService;
     
+    /**
+     * RF-007: Genera datos completos del dashboard con métricas en tiempo real.
+     * Incluye resumen ejecutivo, estado de colas, asesores y alertas.
+     * 
+     * @return DashboardResponse con todos los datos del dashboard
+     */
     public DashboardResponse getDashboardData() {
         log.debug("Generating dashboard data");
         
@@ -62,6 +86,14 @@ public class DashboardService {
         );
     }
     
+    /**
+     * Genera resumen ejecutivo con métricas clave del día.
+     * Calcula tickets activos, completados, tiempo promedio y tasa de completación.
+     * 
+     * @param startOfDay Inicio del día para cálculos
+     * @param now Momento actual
+     * @return ResumenEjecutivo con métricas calculadas
+     */
     private DashboardResponse.ResumenEjecutivo generateResumenEjecutivo(LocalDateTime startOfDay, LocalDateTime now) {
         // Tickets activos (en espera + llamados + en progreso)
         List<TicketStatus> activeStatuses = List.of(TicketStatus.WAITING, TicketStatus.CALLED, TicketStatus.IN_SERVICE);
@@ -143,6 +175,12 @@ public class DashboardService {
         );
     }
     
+    /**
+     * Genera alertas automáticas basadas en umbrales del sistema.
+     * Detecta saturación de colas y falta de asesores disponibles.
+     * 
+     * @return Lista de alertas activas con prioridad y recomendaciones
+     */
     private List<DashboardResponse.Alerta> generateAlertas() {
         List<DashboardResponse.Alerta> alertas = new ArrayList<>();
         LocalDateTime now = LocalDateTime.now();

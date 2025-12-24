@@ -15,8 +15,22 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * QueueManagementService según especificación del plan - Sección 8.3
- * Implementa RN-002, RN-003, RN-004: Asignación automática con prioridades
+ * Service de gestión avanzada de colas con asignación automática inteligente.
+ * 
+ * Implementa: RF-003 (Cálculo de posiciones), RF-004 (Asignación automática)
+ * Reglas de Negocio: RN-002 (Prioridades), RN-003 (FIFO), RN-004 (Balanceo), RN-010 (Tiempo estimado), RN-012 (Pre-aviso)
+ * 
+ * Algoritmos implementados:
+ * - Selección por prioridad: GERENCIA > EMPRESAS > PERSONAL_BANKER > CAJA
+ * - Balanceo de carga por assignedTicketsCount ascendente
+ * - Pre-aviso automático cuando posición ≤ 3
+ * - Recálculo de posiciones cada 5 segundos vía scheduler
+ * 
+ * Dependencias: TicketRepository, AdvisorRepository, TelegramService, AuditService
+ * 
+ * @author Sistema Ticketero
+ * @version 1.0
+ * @since 1.0
  */
 @Service
 @Transactional
@@ -29,6 +43,13 @@ public class QueueManagementService {
     private final TelegramService telegramService;
     private final AuditService auditService;
     
+    /**
+     * RN-010: Calcula posición en cola y tiempo estimado de espera.
+     * Fórmula: posición * tiempo promedio por tipo de cola
+     * 
+     * @param queueType Tipo de cola para cálculo
+     * @return PositionInfo con posición y tiempo estimado
+     */
     // RN-010: Cálculo tiempo estimado (simplificado)
     public PositionInfo calcularPosicion(QueueType queueType) {
         long count = ticketRepository.count();
@@ -39,6 +60,16 @@ public class QueueManagementService {
         return new PositionInfo(position, estimatedTime);
     }
     
+    /**
+     * RN-002, RN-003, RN-004: Asignación automática de tickets con prioridades.
+     * 
+     * Proceso:
+     * 1. Selecciona ticket con mayor prioridad (RN-002)
+     * 2. Busca asesor disponible con menor carga (RN-004)
+     * 3. Asigna ticket y actualiza estados
+     * 4. Registra evento de auditoría (RN-011)
+     * 5. Programa notificación Telegram (RF-002)
+     */
     // RN-002, RN-003, RN-004: Asignación automática - CORREGIDA
     public void asignarSiguienteTicket() {
         // RN-002: Seleccionar ticket con mayor prioridad
@@ -80,6 +111,12 @@ public class QueueManagementService {
                 ticket.getNumero(), asesor.getName(), asesor.getModuleNumber());
     }
     
+    /**
+     * RN-012: Recálculo de posiciones con pre-aviso automático.
+     * Envía notificación cuando posición ≤ 3 y cambia estado a CALLED.
+     * 
+     * @param queueType Tipo de cola a recalcular
+     */
     // RN-012: Pre-aviso cuando posición ≤ 3 (simplificado)
     public void recalcularPosiciones(QueueType queueType) {
         List<Ticket> tickets = ticketRepository.findByStatusOrderByFechaCreacionAsc(TicketStatus.WAITING);

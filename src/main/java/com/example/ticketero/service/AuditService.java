@@ -15,8 +15,25 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Service para auditoría - RF-008
- * Trazabilidad completa de acciones en el sistema
+ * Service de auditoría y trazabilidad completa del sistema.
+ * 
+ * Implementa: RF-008 (Auditoría y trazabilidad)
+ * Reglas de Negocio: RN-011 (Auditoría obligatoria), RN-013 (Retención 7 años)
+ * 
+ * Funcionalidades:
+ * - Registro automático de eventos críticos del sistema
+ * - Hash de integridad para validación de auditoría
+ * - Consultas especializadas por ticket, actor y rango de fechas
+ * - Estadísticas de actividad y tipos de eventos
+ * - Cumplimiento normativo con retención de 7 años
+ * 
+ * Eventos auditados: TICKET_CREATED, TICKET_ASSIGNED, STATUS_CHANGED, NOTIFICATION_SENT
+ * 
+ * Dependencias: AuditEventRepository
+ * 
+ * @author Sistema Ticketero
+ * @version 1.0
+ * @since 1.0
  */
 @Service
 @RequiredArgsConstructor
@@ -26,6 +43,13 @@ public class AuditService {
     
     private final AuditEventRepository auditEventRepository;
     
+    /**
+     * RN-011: Registra evento de creación de ticket con datos completos.
+     * Incluye información de cola, sucursal y IP del cliente.
+     * 
+     * @param ticket Ticket creado
+     * @param clientIp IP del cliente que creó el ticket
+     */
     @Transactional
     public void logTicketCreated(Ticket ticket, String clientIp) {
         AuditEvent event = AuditEvent.builder()
@@ -45,6 +69,16 @@ public class AuditService {
         log.debug("Audit logged: TICKET_CREATED for {}", ticket.getNumero());
     }
     
+    /**
+     * RN-011: Registra cambio de estado de ticket con trazabilidad completa.
+     * Incluye estado anterior, nuevo estado y datos del asesor asignado.
+     * 
+     * @param ticket Ticket modificado
+     * @param previousStatus Estado anterior del ticket
+     * @param actor Actor que realizó el cambio
+     * @param actorType Tipo de actor (CLIENT, ADVISOR, SYSTEM, SUPERVISOR)
+     * @param clientIp IP desde donde se realizó el cambio
+     */
     @Transactional
     public void logStatusChange(Ticket ticket, String previousStatus, String actor, ActorType actorType, String clientIp) {
         AuditEvent event = AuditEvent.builder()
@@ -150,6 +184,17 @@ public class AuditService {
         log.debug("Audit logged: NOTIFICATION_SENT for ticket {}", ticketNumber);
     }
     
+    /**
+     * RN-011: Método genérico para registro de eventos de auditoría.
+     * Utilizado por QueueManagementService y otros componentes del sistema.
+     * 
+     * @param eventType Tipo de evento (TICKET_CREATED, TICKET_ASSIGNED, etc.)
+     * @param actor Actor que ejecuta la acción
+     * @param ticketId ID del ticket afectado (puede ser null)
+     * @param previousState Estado anterior
+     * @param newState Nuevo estado
+     * @param additionalData Datos adicionales en formato JSON
+     */
     // Método faltante para compatibilidad con QueueManagementService
     @Transactional
     public void registrarEvento(String eventType, String actor, Long ticketId, 
@@ -174,6 +219,12 @@ public class AuditService {
         log.debug("Evento de auditoría registrado: {} por {}", eventType, actor);
     }
     
+    /**
+     * Determina tipo de actor basado en formato del identificador.
+     * 
+     * @param actor Identificador del actor
+     * @return ActorType correspondiente
+     */
     private ActorType determinarActorType(String actor) {
         if ("SYSTEM".equals(actor)) return ActorType.SYSTEM;
         if (actor.contains("@")) return ActorType.SUPERVISOR;

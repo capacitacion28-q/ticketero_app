@@ -9,7 +9,25 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 /**
- * Controller de prueba para forzar asignaciones
+ * Controller de prueba para forzar asignaciones automáticas de tickets.
+ * 
+ * Funcionalidades de testing:
+ * - Forzar asignación manual del próximo ticket en cola
+ * - Crear ticket de prueba y ejecutar asignación
+ * - Verificar funcionamiento del algoritmo de balanceo de carga
+ * 
+ * Endpoints disponibles:
+ * - POST /api/test/assign-next: Forzar asignación del próximo ticket
+ * - POST /api/test/create-and-assign: Crear ticket de prueba y asignar
+ * 
+ * Utilizado para:
+ * - Testing de RN-002 (Selección por prioridad)
+ * - Testing de RN-004 (Balanceo de carga)
+ * - Verificación de asignación automática
+ * 
+ * @author Sistema Ticketero
+ * @version 1.0
+ * @since 1.0
  */
 @RestController
 @RequestMapping("/api/test")
@@ -19,6 +37,12 @@ public class TestAssignmentController {
 
     private final QueueManagementService queueManagementService;
 
+    /**
+     * Fuerza ejecución manual del algoritmo de asignación automática.
+     * Ejecuta RN-002 (prioridades) y RN-004 (balanceo de carga).
+     * 
+     * @return ResponseEntity con resultado de la asignación o error
+     */
     @PostMapping("/assign-next")
     public ResponseEntity<Map<String, String>> forceAssignNext() {
         try {
@@ -37,6 +61,12 @@ public class TestAssignmentController {
         }
     }
     
+    /**
+     * Crea ticket de prueba y ejecuta asignación automática para testing.
+     * Genera RUT temporal y simula flujo completo de asignación.
+     * 
+     * @return ResponseEntity con resultado del proceso o error detallado
+     */
     @PostMapping("/create-and-assign")
     public ResponseEntity<Map<String, Object>> createAndAssign() {
         try {

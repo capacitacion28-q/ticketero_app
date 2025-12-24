@@ -16,8 +16,24 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Service para gestión de asesores - RN-004
- * Implementa balanceo de carga y asignación automática
+ * Service para gestión de asesores con balanceo automático de carga.
+ * 
+ * Implementa: RF-004 (Asignación automática de ejecutivos)
+ * Reglas de Negocio: RN-004 (Balanceo de carga entre ejecutivos)
+ * 
+ * Funcionalidades:
+ * - Asignación automática basada en menor carga de trabajo
+ * - Liberación automática al completar tickets
+ * - Estadísticas de productividad por asesor
+ * - Gestión de estados (AVAILABLE, BUSY, OFFLINE)
+ * 
+ * Algoritmo de balanceo: Selecciona asesor AVAILABLE con menor assignedTicketsCount
+ * 
+ * Dependencias: AdvisorRepository, TicketRepository, NotificationService
+ * 
+ * @author Sistema Ticketero
+ * @version 1.0
+ * @since 1.0
  */
 @Service
 @RequiredArgsConstructor
@@ -29,6 +45,12 @@ public class AdvisorService {
     private final TicketRepository ticketRepository;
     private final NotificationService notificationService;
     
+    /**
+     * RN-004: Asigna próximo ticket al asesor con menor carga de trabajo.
+     * Implementa balanceo automático y notificación al cliente.
+     * 
+     * @return Optional con ticket asignado o empty si no hay tickets/asesores disponibles
+     */
     @Transactional
     public Optional<Ticket> assignNextTicket() {
         log.debug("Looking for next ticket to assign");
@@ -59,6 +81,14 @@ public class AdvisorService {
         return assignTicketToAdvisor(ticket, advisor);
     }
     
+    /**
+     * RN-004: Asigna ticket específico a asesor determinado.
+     * Actualiza estados, incrementa contador de carga y envía notificación.
+     * 
+     * @param ticket Ticket a asignar
+     * @param advisor Asesor que recibirá el ticket
+     * @return Optional con ticket asignado
+     */
     @Transactional
     public Optional<Ticket> assignTicketToAdvisor(Ticket ticket, Advisor advisor) {
         log.info("Assigning ticket {} to advisor {} (module {})", 
@@ -88,6 +118,13 @@ public class AdvisorService {
         return Optional.of(savedTicket);
     }
     
+    /**
+     * Completa ticket y libera asesor para nueva asignación.
+     * Decrementa contador de carga y cambia estado a AVAILABLE.
+     * Intenta asignar próximo ticket automáticamente.
+     * 
+     * @param ticketNumber Número del ticket a completar
+     */
     @Transactional
     public void completeTicket(String ticketNumber) {
         Optional<Ticket> ticketOpt = ticketRepository.findByNumero(ticketNumber);

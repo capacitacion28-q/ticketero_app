@@ -13,6 +13,34 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Scheduler para procesamiento asíncrono de mensajes Telegram cada 60 segundos.
+ * 
+ * Implementa: RF-002 (Programación de mensajes Telegram)
+ * Reglas de Negocio: RN-007 (Máximo 3 reintentos), RN-008 (Backoff exponencial)
+ * 
+ * Funcionalidades:
+ * - Procesamiento de cola de mensajes pendientes
+ * - Sistema de reintentos con backoff exponencial (30s, 60s, 120s)
+ * - Manejo de fallos con límite de 3 reintentos
+ * - Ejecución cada 60 segundos (configurable)
+ * 
+ * Algoritmo de reintentos:
+ * - Intento 1: Inmediato
+ * - Intento 2: +30 segundos
+ * - Intento 3: +60 segundos
+ * - Intento 4: +120 segundos
+ * - Después: FALLIDO
+ * 
+ * Configuración:
+ * - Intervalo: scheduler.message.fixed-rate (default: 60000ms)
+ * 
+ * Dependencias: MensajeRepository, TelegramService
+ * 
+ * @author Sistema Ticketero
+ * @version 1.0
+ * @since 1.0
+ */
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -21,6 +49,10 @@ public class MensajeScheduler {
     private final MensajeRepository mensajeRepository;
     private final TelegramService telegramService;
 
+    /**
+     * RF-002: Método principal de procesamiento ejecutado cada 60 segundos.
+     * Obtiene mensajes pendientes y los envía vía TelegramService.
+     */
     // RF-002: Procesamiento cada 60s según plan
     @Scheduled(fixedRateString = "${scheduler.message.fixed-rate:60000}")
     @Transactional
@@ -46,6 +78,17 @@ public class MensajeScheduler {
         }
     }
 
+    /**
+     * RN-007, RN-008: Maneja fallos de envío con sistema de reintentos y backoff exponencial.
+     * 
+     * Lógica:
+     * - Incrementa contador de intentos
+     * - Si >= 4 intentos: marca como FALLIDO (RN-007)
+     * - Si < 4 intentos: programa reintento con backoff exponencial (RN-008)
+     * 
+     * @param mensaje Mensaje que falló en el envío
+     * @param e Excepción que causó el fallo
+     */
     // RN-007, RN-008: Manejo de fallos con backoff exponencial
     private void manejarFalloEnvio(Mensaje mensaje, Exception e) {
         log.warn("Fallo enviando mensaje {}: {}", mensaje.getId(), e.getMessage());

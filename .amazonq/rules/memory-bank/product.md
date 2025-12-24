@@ -1,71 +1,60 @@
 # Sistema Ticketero Digital - Product Overview
 
 ## Project Purpose
-Digital ticket management system designed for financial institutions to streamline customer service operations through automated queue management and Telegram bot integration.
+Digital ticket management system designed for financial institutions to streamline customer service operations through automated queue management and multi-channel communication.
 
-## Value Proposition
-- **Automated Queue Management**: Intelligent ticket routing and advisor assignment
-- **Real-time Notifications**: Telegram bot integration for instant updates
-- **Audit Trail**: Comprehensive tracking of all system activities
-- **Dashboard Analytics**: Real-time monitoring of queue status and performance metrics
-- **Scalable Architecture**: Spring Boot microservices with PostgreSQL persistence
+## Core Value Proposition
+- **Automated Queue Management**: Intelligent ticket assignment based on priority levels (CRITICA, PREFERENCIAL, EMPRESARIAL, GENERAL)
+- **Multi-Channel Integration**: Telegram Bot API integration for customer notifications and interactions
+- **Real-Time Operations**: Live dashboard monitoring with automated status updates and queue processing
+- **Audit Compliance**: Complete transaction logging with 7-year retention for regulatory compliance
+- **Scalable Architecture**: Spring Boot microservices design supporting concurrent operations
 
-## Key Features
+## Key Features & Capabilities
 
-### Core Ticket Management
-- Create, update, and track customer service tickets
-- Automatic ticket assignment to available advisors
-- Status tracking throughout ticket lifecycle
-- Priority-based queue management
+### Queue Management System
+- Priority-based ticket assignment with configurable rules
+- Automatic timeout handling for no-show customers (5-minute default)
+- Real-time queue status monitoring and updates
+- Advisor workload balancing (max 3 concurrent tickets per advisor)
 
-### Telegram Integration
-- Bot notifications for ticket updates
-- Real-time status messages to customers and advisors
+### Communication & Notifications
+- Telegram Bot integration for customer notifications
 - Automated message scheduling and delivery
-- Template-based communication system
+- Retry mechanisms with exponential backoff for failed communications
+- Multi-language support for customer interactions
 
-### Queue Management
-- Multiple queue types (GENERAL, PRIORITY, VIP)
-- Advisor availability tracking and status management
-- Load balancing across available advisors
-- Queue processing automation with schedulers
+### Dashboard & Monitoring
+- Real-time operational dashboard with live metrics
+- Queue status visualization and management tools
+- Advisor performance tracking and availability monitoring
+- System health checks and operational alerts
 
-### Administrative Features
-- Dashboard with real-time metrics and KPIs
-- Audit logging for compliance and monitoring
-- Advisor management and status control
-- System health monitoring and reporting
+### Audit & Compliance
+- Comprehensive audit trail for all system operations
+- Automated data retention policies (7-year compliance)
+- Transaction logging with timestamp and user tracking
+- Regulatory reporting capabilities
 
-## Target Users
+## Target Users & Use Cases
 
 ### Primary Users
-- **Customer Service Advisors**: Handle assigned tickets and manage customer interactions
-- **Queue Managers**: Monitor and optimize queue performance
-- **System Administrators**: Oversee system operations and user management
+- **Bank Customers**: Queue registration, status updates, notifications
+- **Financial Advisors**: Ticket management, customer service operations
+- **Branch Managers**: Queue monitoring, performance analytics
+- **System Administrators**: Configuration, monitoring, maintenance
 
-### Secondary Users
-- **Customers**: Receive automated notifications via Telegram
-- **Supervisors**: Access dashboard analytics and audit reports
-- **IT Operations**: Monitor system health and performance
+### Core Use Cases
+1. **Customer Queue Registration**: Customers join queues via multiple channels
+2. **Automated Ticket Assignment**: System assigns tickets based on priority and advisor availability
+3. **Real-Time Notifications**: Customers receive updates via Telegram about queue status
+4. **Advisor Workflow Management**: Advisors manage their assigned tickets through the system
+5. **Operational Monitoring**: Managers monitor queue performance and system metrics
+6. **Compliance Reporting**: Generate audit reports for regulatory requirements
 
-## Use Cases
-
-### Operational Workflows
-1. **Ticket Creation**: Customer requests create tickets that enter appropriate queues
-2. **Advisor Assignment**: System automatically assigns tickets to available advisors
-3. **Status Updates**: Real-time notifications keep all parties informed
-4. **Queue Processing**: Automated schedulers ensure efficient ticket flow
-5. **Audit Tracking**: All activities logged for compliance and analysis
-
-### Administrative Workflows
-1. **Dashboard Monitoring**: Real-time view of system performance and metrics
-2. **Advisor Management**: Control advisor availability and workload distribution
-3. **Queue Optimization**: Analyze and adjust queue processing parameters
-4. **System Maintenance**: Health checks and performance monitoring
-
-## Business Value
+## Business Impact
 - Reduced customer wait times through intelligent queue management
-- Improved advisor productivity with automated assignment
-- Enhanced customer satisfaction via real-time communication
-- Compliance support through comprehensive audit trails
-- Data-driven insights for continuous process improvement
+- Improved customer satisfaction via proactive notifications
+- Enhanced operational efficiency with automated workflows
+- Regulatory compliance through comprehensive audit trails
+- Scalable solution supporting multiple branches and high transaction volumes

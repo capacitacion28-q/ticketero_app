@@ -1,90 +1,74 @@
-# Sistema Ticketero Digital - Technology Stack
+# Sistema Ticketero - Technology Stack
 
-## Programming Languages & Versions
-- **Java 17**: Primary development language with modern LTS features
-- **SQL**: PostgreSQL-specific queries and Flyway migrations
-- **YAML**: Configuration files (application.yml, docker-compose.yml)
-- **XML**: Maven POM configuration
+## Core Technologies
 
-## Core Framework & Dependencies
-
-### Spring Boot 3.2.11
-- **spring-boot-starter-web**: REST API development with embedded Tomcat
-- **spring-boot-starter-data-jpa**: JPA/Hibernate ORM with repository pattern
-- **spring-boot-starter-validation**: Bean validation with JSR-303 annotations
-- **spring-boot-starter-actuator**: Production monitoring and health checks
-- **spring-boot-starter-test**: Comprehensive testing framework
+### Backend Framework
+- **Spring Boot 3.2.11**: Main application framework
+- **Java 17**: Programming language and runtime
+- **Maven**: Build system and dependency management
 
 ### Database & Persistence
-- **PostgreSQL**: Primary production database
+- **PostgreSQL**: Primary database for production
+- **Spring Data JPA**: Object-relational mapping
+- **Hibernate**: JPA implementation with PostgreSQL dialect
 - **Flyway 9.22.3**: Database migration management
-- **H2**: In-memory database for testing
-- **JPA/Hibernate**: ORM with entity relationship mapping
+- **H2 Database**: In-memory database for testing
 
-### Additional Libraries
-- **Lombok**: Boilerplate code reduction (getters, setters, builders)
-- **Spring Retry**: Resilience patterns for external API calls
-- **Spring Aspects**: AOP support for cross-cutting concerns
+### External Integrations
+- **Telegram Bot API**: Customer notification system
+- **RestTemplate**: HTTP client for external API calls
+- **Spring Retry**: Resilient communication with exponential backoff
 
-## Build System & Tools
+### Development & Testing
+- **Lombok**: Boilerplate code reduction
+- **Spring Boot Test**: Testing framework
+- **JUnit**: Unit testing
+- **Spring Boot Actuator**: Application monitoring and health checks
 
-### Maven Configuration
+## Build Configuration
+
+### Maven Dependencies
 ```xml
-<groupId>com.example</groupId>
-<artifactId>ticketero</artifactId>
-<version>1.0.0</version>
-<java.version>17</java.version>
+<!-- Core Spring Boot -->
+spring-boot-starter-web
+spring-boot-starter-data-jpa
+spring-boot-starter-validation
+spring-boot-starter-actuator
+
+<!-- Database -->
+postgresql (runtime)
+flyway-core
+h2 (test scope)
+
+<!-- Utilities -->
+lombok (optional)
+spring-retry
+spring-aspects
 ```
 
-### Key Maven Plugins
-- **spring-boot-maven-plugin**: Application packaging and execution
-- **flyway-maven-plugin**: Database migration management
-- **maven-compiler-plugin**: Java 17 compilation
-
-## Development Environment
-
-### Database Configuration
-```yaml
-# Development Database
-URL: jdbc:postgresql://localhost:5432/ticketero_db
-User: ticketero_user
-Password: ticketero_pass
-```
-
-### Application Profiles
-- **Default Profile**: Development configuration with local PostgreSQL
-- **Test Profile**: H2 in-memory database with test-specific settings
-
-## External Integrations
-
-### Telegram Bot API
-- REST client integration for bot notifications
-- Environment variable configuration for bot tokens
-- Retry mechanisms for API reliability
-
-### Scheduler Configuration
-- Spring's @Scheduled annotation for background processing
-- Configurable intervals for queue processing and message delivery
-- Async execution support
+### Java Configuration
+- **Source/Target**: Java 17
+- **Encoding**: UTF-8
+- **Compiler**: Maven Compiler Plugin
 
 ## Development Commands
 
-### Application Lifecycle
+### Build & Run
 ```bash
-# Build application
+# Clean and compile
 mvn clean compile
 
 # Run tests
 mvn test
 
 # Package application
-mvn clean package
+mvn package
 
 # Run application
 mvn spring-boot:run
 
 # Run with specific profile
-mvn spring-boot:run -Dspring-boot.run.profiles=test
+mvn spring-boot:run -Dspring-boot.run.profiles=dev
 ```
 
 ### Database Management
@@ -95,6 +79,9 @@ mvn flyway:migrate
 # Validate migrations
 mvn flyway:validate
 
+# Show migration info
+mvn flyway:info
+
 # Clean database (development only)
 mvn flyway:clean
 ```
@@ -104,66 +91,98 @@ mvn flyway:clean
 # Build and start services
 docker-compose up -d
 
+# Stop services
+docker-compose down
+
 # View logs
 docker-compose logs -f
 
-# Stop services
-docker-compose down
+# Rebuild containers
+docker-compose up --build
 ```
 
-## Testing Framework
+## Environment Configuration
 
-### Test Dependencies
-- **JUnit 5**: Primary testing framework
-- **Spring Boot Test**: Integration testing with application context
-- **H2 Database**: In-memory testing database
-- **Mockito**: Mocking framework (included in spring-boot-starter-test)
+### Database Connection
+```yaml
+# Development (default)
+DATABASE_HOST: localhost
+DATABASE_PORT: 5432
+DATABASE_NAME: ticketero_db
+DATABASE_USER: ticketero_user
+DATABASE_PASSWORD: ticketero_pass
+```
 
-### Test Categories
-- **Unit Tests**: Service layer business logic testing
-- **Integration Tests**: Repository and controller testing
-- **Validation Tests**: DTO and entity validation testing
+### Telegram Integration
+```yaml
+# Bot configuration
+TELEGRAM_BOT_TOKEN: "8450583015:AAFtvB0Ljq2330--0LkHbmq-PaA0S87Zr9A"
+TELEGRAM_TIMEOUT: 30000
+```
 
-## Configuration Management
+### Scheduler Configuration
+```yaml
+# Processing intervals
+SCHEDULER_MESSAGE_RATE: 60000  # 60 seconds
+SCHEDULER_QUEUE_RATE: 5000     # 5 seconds
+```
 
-### Environment Variables
-- `TELEGRAM_BOT_TOKEN`: Telegram Bot API authentication
-- `DATABASE_URL`: Production database connection string
-- `SPRING_PROFILES_ACTIVE`: Active configuration profile
+### Application Settings
+```yaml
+# Server configuration
+SERVER_PORT: 8080
 
-### Application Properties
-- Database connection settings
-- Scheduler intervals and timing
-- Telegram API configuration
-- Logging levels and patterns
+# Audit retention
+AUDIT_RETENTION_DAYS: 2555  # 7 years
 
-## Security Considerations
-- No sensitive credentials in source code
-- Environment variable configuration for secrets
-- Input validation with Bean Validation
-- Exception handling without information leakage
+# Queue management
+NO_SHOW_TIMEOUT: 5          # 5 minutes
+MAX_CONCURRENT_TICKETS: 3   # Per advisor
+```
 
-## Performance Features
-- Connection pooling for database operations
-- Async processing for background tasks
-- Retry mechanisms for external API calls
-- Efficient JPA queries with proper indexing
+## Development Profiles
+
+### Default (Development)
+- Local PostgreSQL database
+- Debug logging enabled
+- Development Telegram token
+- Fast scheduler intervals for testing
+
+### Test Profile
+- H2 in-memory database
+- Test-specific configurations
+- Mock external services
+- Reduced timeouts for faster tests
+
+### Production Profile
+- External database configuration
+- Production logging levels
+- Production API tokens
+- Optimized scheduler intervals
+
+## IDE Setup Requirements
+
+### Required Plugins/Extensions
+- **Lombok**: For annotation processing
+- **Spring Boot**: For enhanced Spring support
+- **Database**: PostgreSQL driver support
+
+### Recommended Settings
+- **Java 17** as project SDK
+- **Maven** as build tool
+- **UTF-8** file encoding
+- **Spring Boot** run configurations
 
 ## Monitoring & Observability
-- Spring Boot Actuator endpoints for health checks
-- Comprehensive audit logging
-- Dashboard metrics and KPIs
-- Exception tracking and error reporting
 
-## Package Structure Convention
-```
-com.example.ticketero (prototype - change to com.{company}.ticketero for production)
-├── config/          # Configuration classes
-├── controller/      # REST endpoints
-├── service/         # Business logic
-├── repository/      # Data access
-├── model/           # Entities, DTOs, enums
-├── scheduler/       # Background processing
-├── exception/       # Error handling
-└── test/           # Internal testing utilities
-```
+### Spring Boot Actuator Endpoints
+- `/actuator/health`: Application health status
+- `/actuator/info`: Application information
+- `/actuator/metrics`: Application metrics
+- `/actuator/env`: Environment properties
+
+### Logging Configuration
+- **Console Pattern**: Timestamp and message format
+- **File Pattern**: Thread, level, logger, and message
+- **Log Levels**: Configurable per package
+- **Audit Logging**: Separate audit trail logging

@@ -12,6 +12,24 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Entidad principal del Sistema Ticketero que representa un ticket de atención al cliente.
+ * 
+ * Implementa: RF-001 (Creación de tickets), RF-006 (Consulta de tickets)
+ * Reglas de Negocio: RN-001 (Unicidad ticket activo), RN-005/RN-006 (Numeración secuencial)
+ * 
+ * Relaciones JPA:
+ * - 1:N con Mensaje (notificaciones Telegram)
+ * - 1:N con AuditEvent (trazabilidad completa)
+ * 
+ * Índices críticos:
+ * - idx_ticket_active_unique: Garantiza RN-001 (unicidad por nationalId activo)
+ * - idx_ticket_queue_fifo: Implementa RN-003 (orden FIFO por cola)
+ * 
+ * @author Sistema Ticketero
+ * @version 1.0
+ * @since 1.0
+ */
 @Entity
 @Table(name = "ticket")
 @Data
@@ -73,6 +91,10 @@ public class Ticket {
     @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<AuditEvent> auditEvents;
     
+    /**
+     * Callback JPA ejecutado antes de persistir la entidad.
+     * Inicializa campos obligatorios y timestamps automáticos.
+     */
     @PrePersist
     protected void onCreate() {
         if (codigoReferencia == null) {
@@ -82,6 +104,10 @@ public class Ticket {
         fechaActualizacion = LocalDateTime.now();
     }
     
+    /**
+     * Callback JPA ejecutado antes de actualizar la entidad.
+     * Actualiza timestamp de modificación automáticamente.
+     */
     @PreUpdate
     protected void onUpdate() {
         fechaActualizacion = LocalDateTime.now();
