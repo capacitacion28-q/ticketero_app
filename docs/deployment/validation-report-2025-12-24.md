@@ -62,7 +62,7 @@ public | ticket                | table | ticketero_user
 DATABASE_NAME=ticketero_db
 DATABASE_USER=ticketero_user
 DATABASE_PASSWORD=ticketero_pass
-TELEGRAM_BOT_TOKEN=8450583015:AAFtvB0Ljq2330--0LkHbmq-PaA0S87Zr9A
+TELEGRAM_BOT_TOKEN=123456789:ABC-DEF1234ghIkl-zyx57W2v1u123ew11
 SCHEDULER_MESSAGE_RATE=60000  # 60 segundos
 SCHEDULER_QUEUE_RATE=5000     # 5 segundos
 ```

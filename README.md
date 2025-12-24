@@ -2,6 +2,15 @@
 
 Sistema de gestión de tickets para institución financiera desarrollado con Spring Boot y PostgreSQL.
 
+## 📚 Índice
+- [🚀 Inicio Rápido (5 minutos)](#-inicio-rápido-5-minutos)
+- [🛠️ Requisitos del Ambiente](#️-requisitos-del-ambiente)
+- [⚙️ Variables de Entorno](#️-variables-de-entorno)
+- [🚀 Despliegue con Docker Compose](#-despliegue-con-docker-compose)
+- [📊 Estado del Proyecto](#-estado-del-proyecto)
+
+---
+
 ## 🛠️ Requisitos del Ambiente
 
 ### Herramientas Requeridas
@@ -139,6 +148,146 @@ Análisis y especificación de requerimientos del sistema.
 - Requerimientos de negocio
 - Análisis funcional IEEE 830
 - Casos de uso
+
+## 🚀 Inicio Rápido (5 minutos)
+
+### Prerrequisitos
+- Java 17+, Maven 3.9+, Docker Desktop
+- [Validar ambiente](#-validación-del-ambiente)
+
+### 1. Configurar Variables de Entorno
+```bash
+# Copiar archivo de configuración
+cp .env.example .env
+```
+
+### 2. Editar Variables OBLIGATORIAS
+```bash
+# Abrir .env y cambiar:
+DATABASE_PASSWORD=tu_password_seguro
+TELEGRAM_BOT_TOKEN=123456789:ABC-DEF1234ghIkl-zyx57W2v1u123ew11
+```
+
+### 3. Obtener Token de Telegram
+1. Buscar `@BotFather` en Telegram
+2. Enviar `/newbot` y seguir instrucciones
+3. Copiar token a `TELEGRAM_BOT_TOKEN` en `.env`
+
+### 4. Levantar Sistema
+```bash
+# PostgreSQL + Aplicación local (recomendado)
+docker-compose up -d postgres
+mvn spring-boot:run -Dspring-boot.run.profiles=dev
+```
+
+### 5. Validar Funcionamiento
+```bash
+# Health check
+curl http://localhost:8080/actuator/health
+# Debe retornar: {"status":"UP"}
+
+# Dashboard
+curl http://localhost:8080/api/dashboard/summary
+```
+
+**¡Listo!** El sistema está funcionando en http://localhost:8080
+
+---
+
+## ⚙️ Variables de Entorno
+
+**Fecha de actualización:** 2025-12-24
+
+### Variables Obligatorias
+
+| Variable | Descripción | Ejemplo | Requerida |
+|----------|-------------|---------|----------|
+| `DATABASE_PASSWORD` | Contraseña de PostgreSQL | `mi_password_seguro` | ✅ |
+| `TELEGRAM_BOT_TOKEN` | Token del Bot de Telegram | `123456:ABC-DEF...` | ✅ |
+
+### Variables de Configuración
+
+| Variable | Descripción | Valor por Defecto |
+|----------|-------------|-------------------|
+| `SERVER_PORT` | Puerto de la aplicación | `8080` |
+| `DATABASE_HOST` | Host de PostgreSQL | `localhost` |
+| `DATABASE_PORT` | Puerto de PostgreSQL | `5432` |
+| `DATABASE_NAME` | Nombre de la base de datos | `ticketero_db` |
+| `DATABASE_USER` | Usuario de PostgreSQL | `ticketero_user` |
+| `TELEGRAM_DEFAULT_CHAT_ID` | Chat ID por defecto | `5598409030` |
+| `SCHEDULER_MESSAGE_RATE` | Intervalo procesamiento mensajes (ms) | `60000` |
+| `SCHEDULER_QUEUE_RATE` | Intervalo procesamiento colas (ms) | `5000` |
+| `SCHEDULER_THREAD_POOL_SIZE` | Threads para schedulers | `2` |
+| `TELEGRAM_TIMEOUT` | Timeout Telegram API (ms) | `30000` |
+| `AUDIT_RETENTION_DAYS` | Días retención auditoría | `2555` |
+| `NO_SHOW_TIMEOUT` | Timeout no-show (minutos) | `5` |
+| `MAX_CONCURRENT_TICKETS` | Tickets máximos por asesor | `3` |
+
+### Configuración Paso a Paso
+
+#### 1. Copiar archivo de ejemplo
+```bash
+cp .env.example .env
+```
+
+#### 2. Editar variables obligatorias
+```bash
+# Editar con tu editor preferido
+nano .env
+# o
+code .env
+```
+
+#### 3. Configurar credenciales mínimas
+```bash
+# En el archivo .env, cambiar:
+DATABASE_PASSWORD=tu_password_seguro
+TELEGRAM_BOT_TOKEN=tu_bot_token_de_botfather
+```
+
+#### 4. Levantar con variables
+```bash
+# Solo PostgreSQL
+docker-compose --env-file .env up -d postgres
+
+# Sistema completo
+docker-compose --env-file .env --profile full up -d
+```
+
+### Perfiles de Configuración
+
+| Perfil | Descripción | Uso |
+|--------|-------------|-----|
+| `dev` | PostgreSQL local | Desarrollo con Docker PostgreSQL |
+| `docker` | PostgreSQL container | Despliegue completo con Docker |
+| `quiet` | Schedulers lentos | Testing sin logs frecuentes |
+| `test` | H2 en memoria | Pruebas unitarias |
+
+### Obtener Token de Telegram
+
+1. Buscar `@BotFather` en Telegram
+2. Enviar `/newbot`
+3. Seguir instrucciones
+4. Copiar token generado a `TELEGRAM_BOT_TOKEN`
+
+### 🚨 Troubleshooting Rápido
+
+| Error | Causa | Solución |
+|-------|-------|----------|
+| `Failed to configure a DataSource` | PostgreSQL no iniciado | `docker-compose up -d postgres` |
+| `Telegram API 401 Unauthorized` | Token inválido | Verificar `TELEGRAM_BOT_TOKEN` en `.env` |
+| `Port 8080 already in use` | Puerto ocupado | Cambiar `SERVER_PORT=8081` en `.env` |
+| `Connection refused` | Docker no iniciado | Iniciar Docker Desktop |
+
+### Validación de Variables
+
+```bash
+# Verificar configuración
+mvn spring-boot:run -Dspring-boot.run.profiles=dev
+
+# Verificar health check
+curl http://localhost:8080/actuator/health
+```
 
 ## 🚀 Despliegue con Docker Compose
 

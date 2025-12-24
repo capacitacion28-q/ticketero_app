@@ -99,7 +99,7 @@ curl http://localhost:8080/api/dashboard/summary
 DATABASE_NAME=ticketero_db          ✅ Funcionando
 DATABASE_USER=ticketero_user        ✅ Funcionando  
 DATABASE_PASSWORD=ticketero_pass    ✅ Funcionando
-TELEGRAM_BOT_TOKEN=8450583015:...   ✅ Configurado
+TELEGRAM_BOT_TOKEN=123456789:...   ✅ Configurado
 ```
 
 ### ✅ Puertos

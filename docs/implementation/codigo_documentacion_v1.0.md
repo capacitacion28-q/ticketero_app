@@ -423,7 +423,7 @@ com.example.ticketero/
 ### Integraciones Externas
 - **Telegram Bot API:** 
   - URL: https://api.telegram.org/bot{token}/sendMessage
-  - Token configurado: `8450583015:AAFtvB0Ljq2330--0LkHbmq-PaA0S87Zr9A`
+  - Token configurado: `123456789:ABC-DEF1234ghIkl-zyx57W2v1u123ew11`
   - Chat ID fijo para pruebas: `5598409030`
   - Timeout: 30 segundos
 
