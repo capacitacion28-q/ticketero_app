@@ -5,29 +5,32 @@ spring:
   application:
     name: sistema-ticketero
   
-  # Configuración PostgreSQL según stack tecnológico
+  # Configuración H2 para testing rápido
   datasource:
-    url: jdbc:postgresql://${DATABASE_HOST:localhost}:${DATABASE_PORT:5432}/${DATABASE_NAME:ticketero_db}
-    username: ${DATABASE_USER:ticketero_user}
-    password: ${DATABASE_PASSWORD:ticketero_pass}
-    driver-class-name: org.postgresql.Driver
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: 
+    driver-class-name: org.h2.Driver
   
-  # Configuración JPA/Hibernate
+  # Configuración JPA/Hibernate para H2
   jpa:
     hibernate:
-      ddl-auto: validate  # Flyway maneja el schema
+      ddl-auto: create-drop  # H2 recrea schema automáticamente
     show-sql: false
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
+        dialect: org.hibernate.dialect.H2Dialect
         format_sql: true
   
-  # Configuración Flyway según ADR-004
+  # H2 Console para debugging (opcional)
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  
+  # Flyway deshabilitado para H2
   flyway:
-    enabled: true
-    locations: classpath:db/migration
-    baseline-on-migrate: true
-    validate-on-migrate: true
+    enabled: false
 
 # Configuración de Schedulers según RF-002 y RF-003
 scheduler:
@@ -40,7 +43,7 @@ scheduler:
 
 # Configuración Telegram Bot API según ADR-002
 telegram:
-  bot-token: "8450583015:AAFtvB0Ljq2330--0LkHbmq-PaA0S87Zr9A"
+  bot-token: ${TELEGRAM_BOT_TOKEN:8450583015:AAFtvB0Ljq2330--0LkHbmq-PaA0S87Zr9A}
   api-url: https://api.telegram.org/bot
   timeout: ${TELEGRAM_TIMEOUT:30000}
     

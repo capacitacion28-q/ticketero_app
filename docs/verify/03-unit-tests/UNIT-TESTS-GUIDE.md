@@ -229,6 +229,6 @@ mvn clean test -Dtest="*ServiceTest"
 
 ---
 
-**Última Actualización:** 23 de Diciembre 2024  
+**Última Actualización:** 24 de Diciembre 2024  
 **Versión:** 1.0  
 **Mantenido por:** Equipo de Desarrollo Sistema Ticketero

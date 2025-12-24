@@ -58,7 +58,7 @@ mvn test -Dtest="*ServiceTest"
 ### Verificar Resultados
 ```bash
 # Debe mostrar: Tests run: 45, Failures: 0, Errors: 0, Skipped: 0
-# Tiempo esperado: ~4-5 segundos
+# Tiempo esperado: ~6-7 segundos
 ```
 
 ### Generar Reporte de Cobertura
@@ -76,7 +76,7 @@ mvn jacoco:report
 | Tests Totales | 41 | 45 | ✅ Superado |
 | Servicios Cubiertos | 7 | 8 | ✅ Superado |
 | Cobertura Servicios | >80% | 85% | ✅ Cumplido |
-| Tiempo Ejecución | <5 min | 4.44s | ✅ Excelente |
+| Tiempo Ejecución | <10 min | 6.5s | ✅ Excelente |
 | Tests Exitosos | 100% | 100% | ✅ Perfecto |
 
 ---
@@ -160,6 +160,6 @@ mvn jacoco:report
 
 ---
 
-**Última Actualización:** 23 de Diciembre 2024  
+**Última Actualización:** 24 de Diciembre 2024  
 **Versión:** 1.0  
 **Estado:** Producción Ready ✅

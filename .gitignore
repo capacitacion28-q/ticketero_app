@@ -12,6 +12,7 @@ Thumbs.db
 
 # Logs
 *.log
+docs/verify/reports/*.txt
 
 # Environment variables
 .env

@@ -5,6 +5,7 @@ import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.annotation.DirtiesContext;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
@@ -18,6 +19,7 @@ import static org.hamcrest.Matchers.*;
  * @since 2025-12-24
  */
 @DisplayName("H2 Tests: Creación de Tickets")
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class TicketCreationH2IT extends BaseH2SimpleTest {
 
     @BeforeEach
