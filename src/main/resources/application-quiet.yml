@@ -1,0 +1,78 @@
+# Configuración para testing silencioso con schedulers menos frecuentes
+# NOTA: Este archivo es para desarrollo/validación, NO para tests automáticos
+# Los tests automáticos usan /src/test/resources/application-test.yml
+
+spring:
+  application:
+    name: sistema-ticketero
+  
+  # Configuración PostgreSQL local (Docker)
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ticketero_db
+    username: ${DATABASE_USER:ticketero_user}
+    password: ${DATABASE_PASSWORD:ticketero_pass}
+    driver-class-name: org.postgresql.Driver
+  
+  # Configuración JPA/Hibernate para PostgreSQL
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false  # Reducir logs
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+  
+  # Flyway deshabilitado
+  flyway:
+    enabled: false
+
+# Configuración de Schedulers - INTERVALOS LARGOS PARA VALIDACIÓN SILENCIOSA
+scheduler:
+  message:
+    fixed-rate: ${SCHEDULER_MESSAGE_RATE:300000}  # 5 minutos en lugar de 60 segundos
+  queue:
+    fixed-rate: ${SCHEDULER_QUEUE_RATE:30000}     # 30 segundos en lugar de 5 segundos
+
+# Configuración Telegram Bot API
+telegram:
+  bot-token: ${TELEGRAM_BOT_TOKEN:8450583015:AAFtvB0Ljq2330--0LkHbmq-PaA0S87Zr9A}
+  api-url: https://api.telegram.org/bot
+  timeout: ${TELEGRAM_TIMEOUT:30000}
+
+# Configuración de Reintentos
+retry:
+  telegram:
+    max-attempts: 3
+    backoff:
+      initial-delay: 30000
+      multiplier: 2.0
+      max-delay: 120000
+
+# Configuración de Auditoría
+audit:
+  retention-days: ${AUDIT_RETENTION_DAYS:2555}
+  batch-size: ${AUDIT_BATCH_SIZE:1000}
+
+# Configuración de Colas
+queue:
+  timeout:
+    no-show-minutes: ${NO_SHOW_TIMEOUT:5}
+  priority:
+    order: "CRITICA,PREFERENCIAL,EMPRESARIAL,GENERAL"
+  advisor:
+    max-concurrent: ${MAX_CONCURRENT_TICKETS:3}
+
+# Configuración de Logging - REDUCIDA PARA VALIDACIÓN
+logging:
+  level:
+    com.example.ticketero: WARN  # Solo warnings y errores
+    org.springframework.retry: WARN
+    org.flywaydb: WARN
+    org.hibernate.SQL: WARN
+  pattern:
+    console: "%d{HH:mm:ss} - %msg%n"
+
+# Configuración del servidor
+server:
+  port: ${SERVER_PORT:8080}

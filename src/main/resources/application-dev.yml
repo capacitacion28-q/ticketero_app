@@ -1,0 +1,75 @@
+# Configuración para desarrollo local con PostgreSQL en Docker
+spring:
+  application:
+    name: sistema-ticketero
+  
+  # Configuración PostgreSQL local (Docker)
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ticketero_db
+    username: ${DATABASE_USER:ticketero_user}
+    password: ${DATABASE_PASSWORD:ticketero_pass}
+    driver-class-name: org.postgresql.Driver
+  
+  # Configuración JPA/Hibernate para PostgreSQL
+  jpa:
+    hibernate:
+      ddl-auto: update  # Crear/actualizar tablas automáticamente
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+  
+  # Flyway deshabilitado - usar Hibernate
+  flyway:
+    enabled: false
+
+# Configuración de Schedulers
+scheduler:
+  message:
+    fixed-rate: ${SCHEDULER_MESSAGE_RATE:60000}
+  queue:
+    fixed-rate: ${SCHEDULER_QUEUE_RATE:5000}
+
+# Configuración Telegram Bot API
+telegram:
+  bot-token: ${TELEGRAM_BOT_TOKEN:8450583015:AAFtvB0Ljq2330--0LkHbmq-PaA0S87Zr9A}
+  api-url: https://api.telegram.org/bot
+  timeout: ${TELEGRAM_TIMEOUT:30000}
+
+# Configuración de Reintentos
+retry:
+  telegram:
+    max-attempts: 3
+    backoff:
+      initial-delay: 30000
+      multiplier: 2.0
+      max-delay: 120000
+
+# Configuración de Auditoría
+audit:
+  retention-days: ${AUDIT_RETENTION_DAYS:2555}
+  batch-size: ${AUDIT_BATCH_SIZE:1000}
+
+# Configuración de Colas
+queue:
+  timeout:
+    no-show-minutes: ${NO_SHOW_TIMEOUT:5}
+  priority:
+    order: "CRITICA,PREFERENCIAL,EMPRESARIAL,GENERAL"
+  advisor:
+    max-concurrent: ${MAX_CONCURRENT_TICKETS:3}
+
+# Configuración de Logging
+logging:
+  level:
+    com.example.ticketero: INFO
+    org.springframework.retry: DEBUG
+    org.flywaydb: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# Configuración del servidor
+server:
+  port: ${SERVER_PORT:8080}
